@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ATfsPlayerCharacter::ATfsPlayerCharacter()
 {
@@ -18,6 +19,8 @@ ATfsPlayerCharacter::ATfsPlayerCharacter()
 	ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator( 0.0f,720.0f,0.0f );
 }
 
 void ATfsPlayerCharacter::PawnClientRestart()

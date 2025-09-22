@@ -3,18 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "TfsCharacter.generated.h"
 
 UCLASS()
-class THREEFORSIMPLE_API ATfsCharacter : public ACharacter
+class THREEFORSIMPLE_API ATfsCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ATfsCharacter();
+	void ServerSideInit();
+	void ClientSideInit();
 
+	//It only gets called on the server
+	virtual void PossessedBy(AController* NewController) override;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -26,4 +32,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//***********************************************************//
+	//					Gameplay Ability system
+	//***********************************************************//
+public:
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+private:
+	UPROPERTY(VisibleDefaultsOnly, Category = "GAS")
+	class UTfsAbilitySystemComponent* FtsAbilitySystemComponent;
+	UPROPERTY()
+	class UTfsAttributeSet* FtsAttributeSet;
 };
