@@ -18,6 +18,9 @@ public:
 	void ServerSideInit();
 	void ClientSideInit();
 
+	//Check if it's controlled by the owning player(locally) not another player or server or AI
+	bool IsLocallyControlledByPlayer() const;
+
 	//It only gets called on the server
 	virtual void PossessedBy(AController* NewController) override;
 	
@@ -42,4 +45,23 @@ private:
 	class UTfsAbilitySystemComponent* FtsAbilitySystemComponent;
 	UPROPERTY()
 	class UTfsAttributeSet* FtsAttributeSet;
+
+	//***********************************************************//
+	//							UI
+	//***********************************************************//
+private:
+	void ConfigureOverHeadStatusWidget();
+private:
+	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
+	class UWidgetComponent* OverHeadWidgetComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatGaugeVisibilityCheckUpdateGap = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatGaugeVisibilityRangeSquared = 10000000.f;
+	
+	FTimerHandle HeadStatGaugeVisibilityUpdateTimerHandle;
+
+	void UpdateHeadGaugeVisibility();
 };

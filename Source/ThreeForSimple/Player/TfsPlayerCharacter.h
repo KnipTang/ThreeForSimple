@@ -37,10 +37,13 @@ private:
 	class UInputAction* LookInputAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* JumpInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* GameplayAbilityInputAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* GameplayInputMappingContext;
 
 	void HandleMoveInput(const struct FInputActionValue& InputActionValue);
 	void HandleLookInput(const struct FInputActionValue& InputActionValue);
+	void HandleAbilityInput(const struct FInputActionValue& InputActionValue);
 };

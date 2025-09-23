@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AbilitySystemComponent.h"
 
 ATfsPlayerCharacter::ATfsPlayerCharacter()
 {
@@ -46,6 +47,8 @@ void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 		EnhancedInputComp->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleMoveInput);
 		EnhancedInputComp->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLookInput);
 		EnhancedInputComp->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::Jump);
+
+		EnhancedInputComp->BindAction(GameplayAbilityInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleAbilityInput);
 	}
 }
 
@@ -65,4 +68,12 @@ void ATfsPlayerCharacter::HandleLookInput(const struct FInputActionValue& InputA
 
 	AddControllerPitchInput(-InputVal.Y);
 	AddControllerYawInput(InputVal.X);
+}
+
+void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue)
+{
+	if (bool bPressed = InputActionValue.Get<bool>())
+		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)1);
+	else
+		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)1);
 }

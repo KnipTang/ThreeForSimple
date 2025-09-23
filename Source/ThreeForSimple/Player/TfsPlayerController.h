@@ -21,6 +21,14 @@ public:
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
 
 private:
+	void SpawnGameplayWidget();
+	
 	UPROPERTY()
 	class ATfsPlayerCharacter* TfsPlayerCharacter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UGameplayWidget> GameplayWidgetClass;
+
+	UPROPERTY()
+	class UGameplayWidget* GameplayWidget;
 };

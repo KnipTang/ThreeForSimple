@@ -16,3 +16,18 @@ void UTfsAbilitySystemComponent::ApplyInitialEffects()
 		ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 	}
 }
+
+void UTfsAbilitySystemComponent::GiveInitialAbilities()
+{
+	if(!GetOwner() || !GetOwner()->HasAuthority())
+		return;
+	
+	for (const TSubclassOf<UGameplayAbility>& AbilityPar : AddedAbilities)
+	{
+		GiveAbility(FGameplayAbilitySpec(AbilityPar, 0, (int32)1, nullptr));
+	}
+	for (const TSubclassOf<UGameplayAbility>& AbilityPar : BasicAbilities)
+	{
+		GiveAbility(FGameplayAbilitySpec(AbilityPar, 1, (int32)1, nullptr));
+	}
+}

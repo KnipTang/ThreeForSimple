@@ -4,6 +4,8 @@
 #include "TfsPlayerController.h"
 
 #include "TfsPlayerCharacter.h"
+#include "Blueprint/UserWidget.h"
+#include "ThreeForSimple/Widgets/GameplayWidget.h"
 
 void ATfsPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -24,5 +26,22 @@ void ATfsPlayerController::AcknowledgePossession(APawn* NewPawn)
 	if (TfsPlayerCharacter)
 	{
 		TfsPlayerCharacter->ClientSideInit();
+		SpawnGameplayWidget();
+	}
+}
+
+void ATfsPlayerController::SpawnGameplayWidget()
+{
+	//Check if it's not a dedicated server or listening server instance
+	if (!IsLocalPlayerController())
+		return;
+
+	if (!GameplayWidgetClass)
+		return;
+	
+	GameplayWidget = CreateWidget<UGameplayWidget>(this, GameplayWidgetClass);
+	if (GameplayWidget)
+	{
+		GameplayWidget->AddToViewport();
 	}
 }
