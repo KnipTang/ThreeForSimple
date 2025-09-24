@@ -48,7 +48,8 @@ void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 		EnhancedInputComp->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLookInput);
 		EnhancedInputComp->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::Jump);
 
-		EnhancedInputComp->BindAction(GameplayAbilityInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleAbilityInput);
+		for (const TPair<ECAbilityInputID, class UInputAction*>& GameplayAbilityInputAction : GameplayAbilitiesInputAction)
+			EnhancedInputComp->BindAction(GameplayAbilityInputAction.Value, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleAbilityInput, GameplayAbilityInputAction.Key);
 	}
 }
 
@@ -70,10 +71,10 @@ void ATfsPlayerCharacter::HandleLookInput(const struct FInputActionValue& InputA
 	AddControllerYawInput(InputVal.X);
 }
 
-void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue)
+void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID)
 {
 	if (bool bPressed = InputActionValue.Get<bool>())
-		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)1);
+		GetAbilitySystemComponent()->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
 	else
-		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)1);
+		GetAbilitySystemComponent()->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
 }

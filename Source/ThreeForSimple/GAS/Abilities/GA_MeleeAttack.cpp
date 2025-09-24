@@ -30,7 +30,8 @@ void UGA_MeleeAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Active Ability"));
+	if (!MeleeAttackMontage)
+		return;
 	
 	//Predication key: The one that send out the ability has the prediction key and can therefor already play the animation locally and correct it once if needed the server executed the animation and replicates the data back
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
@@ -71,7 +72,7 @@ void UGA_MeleeAttack::HandleInputPress(float TimeWaited)
 	TryCommitNextCombo();
 }
 
-void UGA_MeleeAttack::TryCommitNextCombo()
+void UGA_MeleeAttack::TryCommitNextCombo() const
 {
 	if (NextComboName == NAME_None)
 		return;
@@ -85,14 +86,11 @@ void UGA_MeleeAttack::TryCommitNextCombo()
 
 void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
 {
-	if (!DamageGameplayEffects)
-		return;
-	
 	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, true, true);
 
 	for (const FHitResult& Result : HitResults)
 	{
-		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageGameplayEffects, 1);
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(GetDamageEffectForCurrentCombo(), GetAbilityLevel(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo()));
 
 		FGameplayEffectContextHandle EffectContextHandle = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
 		EffectContextHandle.AddHitResult(Result);
@@ -103,9 +101,22 @@ void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
 	}
 }
 
+TSubclassOf<UGameplayEffect> UGA_MeleeAttack::GetDamageEffectForCurrentCombo() const
+{
+	const UAnimInstance* AnimInstance = GetAnimationInstance();
+	if (!AnimInstance)
+		return nullptr;
+
+	const FName CurrentSectionName = AnimInstance->Montage_GetCurrentSection(MeleeAttackMontage);
+	if (const TSubclassOf<UGameplayEffect>* FoundEffectPtr = DamageGameplayEffectsMap.Find(CurrentSectionName))
+		return *FoundEffectPtr;
+
+	return nullptr;
+}
+
 void UGA_MeleeAttack::MeleeAttackComboEventReceived(FGameplayEventData Data)
 {
-	FGameplayTag EventTag = Data.EventTag;
+	const FGameplayTag EventTag = Data.EventTag;
 
 	if (EventTag == GetMeleeAttackComboEndEventTag())
 	{

@@ -4,7 +4,7 @@
 #include "TfsGameplayAbility.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-UAnimInstance* UTfsGameplayAbility::GetAnimationInstance()
+UAnimInstance* UTfsGameplayAbility::GetAnimationInstance() const
 {
 	USkeletalMeshComponent* SkeletalMeshComponent = GetOwningComponentFromActorInfo();
 	if (!SkeletalMeshComponent)

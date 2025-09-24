@@ -15,7 +15,7 @@ class THREEFORSIMPLE_API UTfsGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
-	UAnimInstance* GetAnimationInstance();
+	UAnimInstance* GetAnimationInstance() const;
 	
 	TArray<FHitResult> GetHitResultFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius,
 		bool bDrawDebug, bool bIgnoreSelf) const;

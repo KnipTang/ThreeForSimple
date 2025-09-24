@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ThreeForSimple/Character/TfsCharacter.h"
+#include "ThreeForSimple/GAS/TfsGameplayAbilityTypes.h"
 #include "TfsPlayerCharacter.generated.h"
 
 /**
@@ -38,12 +39,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* JumpInputAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	class UInputAction* GameplayAbilityInputAction;
+	TMap<ECAbilityInputID, class UInputAction*> GameplayAbilitiesInputAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* GameplayInputMappingContext;
 
 	void HandleMoveInput(const struct FInputActionValue& InputActionValue);
 	void HandleLookInput(const struct FInputActionValue& InputActionValue);
-	void HandleAbilityInput(const struct FInputActionValue& InputActionValue);
+	void HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID);
 };

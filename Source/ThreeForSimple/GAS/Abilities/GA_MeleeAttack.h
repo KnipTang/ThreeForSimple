@@ -22,14 +22,16 @@ private:
 	void SetupWaitComboInputPress();
 	UFUNCTION()
 	void HandleInputPress(float TimeWaited);
-	void TryCommitNextCombo();
+	void TryCommitNextCombo() const;
 	
 	//Damage
 	UFUNCTION()
 	void DoDamage(FGameplayEventData Data);
+
+	TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
-	TSubclassOf<UGameplayEffect> DamageGameplayEffects;
+	TMap<FName, TSubclassOf<UGameplayEffect>> DamageGameplayEffectsMap;
 	UPROPERTY(EditDefaultsOnly, Category = "Targetting")
 	float TargetSweepSphereRadius = 30.f;
 
