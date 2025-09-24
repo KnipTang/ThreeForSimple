@@ -7,6 +7,8 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
+#include "GameplayTagsManager.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 
 UGA_MeleeAttack::UGA_MeleeAttack()
 {
@@ -40,6 +42,10 @@ void UGA_MeleeAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		PlayMeleeAttackMontageTask->OnCompleted.AddDynamic(this, &UGA_MeleeAttack::K2_EndAbility);
 		PlayMeleeAttackMontageTask->OnInterrupted.AddDynamic(this, &UGA_MeleeAttack::K2_EndAbility);
 		PlayMeleeAttackMontageTask->ReadyForActivation();
+
+		UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GetMeleeAttackComboEventTag(), nullptr, false, false);
+		WaitTargetingEventTask->EventReceived.AddDynamic(this, &UGA_MeleeAttack::MeleeAttackComboEventReceived);
+		WaitTargetingEventTask->ReadyForActivation();
 	}
 
 	if (K2_HasAuthority())
@@ -48,6 +54,33 @@ void UGA_MeleeAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		WaitTargetingEventTask->EventReceived.AddDynamic(this, &UGA_MeleeAttack::DoDamage);
 		WaitTargetingEventTask->ReadyForActivation();
 	}
+
+	SetupWaitComboInputPress();
+}
+
+void UGA_MeleeAttack::SetupWaitComboInputPress()
+{
+	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
+	WaitInputPressTask->OnPress.AddDynamic(this, &UGA_MeleeAttack::HandleInputPress);
+	WaitInputPressTask->ReadyForActivation();
+}
+
+void UGA_MeleeAttack::HandleInputPress(float TimeWaited)
+{
+	SetupWaitComboInputPress();
+	TryCommitNextCombo();
+}
+
+void UGA_MeleeAttack::TryCommitNextCombo()
+{
+	if (NextComboName == NAME_None)
+		return;
+
+	UAnimInstance* AnimInstance = GetAnimationInstance();
+	if (!AnimInstance)
+		return;
+
+	AnimInstance->Montage_SetNextSection(AnimInstance->Montage_GetCurrentSection(MeleeAttackMontage), NextComboName, MeleeAttackMontage);
 }
 
 void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
@@ -70,7 +103,35 @@ void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
 	}
 }
 
-FGameplayTag UGA_MeleeAttack::GetMeleeAttackTargetEventTag() const
+void UGA_MeleeAttack::MeleeAttackComboEventReceived(FGameplayEventData Data)
+{
+	FGameplayTag EventTag = Data.EventTag;
+
+	if (EventTag == GetMeleeAttackComboEndEventTag())
+	{
+		NextComboName = NAME_None;
+		UE_LOG(LogTemp, Warning, TEXT("next combo is cleared"));
+		return;
+	}
+
+	TArray<FName> TagNames;
+	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, TagNames);
+	NextComboName = TagNames.Last();
+
+	UE_LOG(LogTemp, Warning, TEXT("next combo is now: %s"), *NextComboName.ToString());
+}
+
+FGameplayTag UGA_MeleeAttack::GetMeleeAttackTargetEventTag()
 {
 	return FGameplayTag::RequestGameplayTag("Ability.MeleeAttack.Damage");
+}
+
+FGameplayTag UGA_MeleeAttack::GetMeleeAttackComboEventTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.MeleeAttack.Combo");
+}
+
+FGameplayTag UGA_MeleeAttack::GetMeleeAttackComboEndEventTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.MeleeAttack.Combo.End");
 }

@@ -4,6 +4,15 @@
 #include "TfsGameplayAbility.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+UAnimInstance* UTfsGameplayAbility::GetAnimationInstance()
+{
+	USkeletalMeshComponent* SkeletalMeshComponent = GetOwningComponentFromActorInfo();
+	if (!SkeletalMeshComponent)
+		return nullptr;
+
+	return SkeletalMeshComponent->GetAnimInstance();
+}
+
 TArray<FHitResult> UTfsGameplayAbility::GetHitResultFromSweepLocationTargetData(
 	const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug,
 	bool bIgnoreSelf) const

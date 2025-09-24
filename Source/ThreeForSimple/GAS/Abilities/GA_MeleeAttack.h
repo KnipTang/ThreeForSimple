@@ -19,6 +19,11 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 private:
+	void SetupWaitComboInputPress();
+	UFUNCTION()
+	void HandleInputPress(float TimeWaited);
+	void TryCommitNextCombo();
+	
 	//Damage
 	UFUNCTION()
 	void DoDamage(FGameplayEventData Data);
@@ -28,8 +33,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Targetting")
 	float TargetSweepSphereRadius = 30.f;
 
+	//Combo
+	UFUNCTION()
+	void MeleeAttackComboEventReceived(FGameplayEventData Data);
 	
-	FGameplayTag GetMeleeAttackTargetEventTag() const;
+	static FGameplayTag GetMeleeAttackTargetEventTag();
+	static FGameplayTag GetMeleeAttackComboEventTag();
+	static FGameplayTag GetMeleeAttackComboEndEventTag();
+
+	FName NextComboName;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* MeleeAttackMontage;
