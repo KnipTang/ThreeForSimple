@@ -4,8 +4,12 @@
 #include "TfsCharacter.h"
 
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemComponent.h"
+#include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 #include "ThreeForSimple/GAS/TfsAttributeSet.h"
 #include "ThreeForSimple/Widgets/OverHeadStatsGauge.h"
 
@@ -15,23 +19,25 @@ ATfsCharacter::ATfsCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	FtsAbilitySystemComponent = CreateDefaultSubobject<UTfsAbilitySystemComponent>("Ability System Component");
-	FtsAttributeSet = CreateDefaultSubobject<UTfsAttributeSet>("Attribute Set");
+	TfsAbilitySystemComponent = CreateDefaultSubobject<UTfsAbilitySystemComponent>("Ability System Component");
+	TfsAttributeSet = CreateDefaultSubobject<UTfsAttributeSet>("Attribute Set");
 
 	OverHeadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
+
+	BindGASChangeDelegate();
 }
 
 void ATfsCharacter::ServerSideInit()
 {
-	FtsAbilitySystemComponent->InitAbilityActorInfo(this, this);
-	FtsAbilitySystemComponent->ApplyInitialEffects();
-	FtsAbilitySystemComponent->GiveInitialAbilities();
+	TfsAbilitySystemComponent->InitAbilityActorInfo(this, this);
+	TfsAbilitySystemComponent->ApplyInitialEffects();
+	TfsAbilitySystemComponent->GiveInitialAbilities();
 }
 
 void ATfsCharacter::ClientSideInit()
 {
-	FtsAbilitySystemComponent->InitAbilityActorInfo(this, this);
+	TfsAbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 bool ATfsCharacter::IsLocallyControlledByPlayer() const
@@ -56,6 +62,7 @@ void ATfsCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	ConfigureOverHeadStatusWidget();
+	MeshRelativeTransform = GetMesh()->GetRelativeTransform();
 }
 
 // Called every frame
@@ -74,7 +81,23 @@ void ATfsCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 UAbilitySystemComponent* ATfsCharacter::GetAbilitySystemComponent() const
 {
-	return FtsAbilitySystemComponent;
+	return TfsAbilitySystemComponent;
+}
+
+void ATfsCharacter::BindGASChangeDelegate()
+{
+	if (TfsAbilitySystemComponent)
+	{
+		TfsAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetDeadStatTag()).AddUObject(this, &ATfsCharacter::DeathTagUpdated);
+	}
+}
+
+void ATfsCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	if (NewCount != 0)
+		StartDeathSequence();
+	else
+		StartRespawnSequence();
 }
 
 void ATfsCharacter::ConfigureOverHeadStatusWidget()
@@ -107,5 +130,88 @@ void ATfsCharacter::UpdateHeadGaugeVisibility()
 		float DistSquared = FVector::DistSquared(GetActorLocation(), LocalPlayerPawn->GetActorLocation());
 		OverHeadWidgetComponent->SetHiddenInGame(DistSquared > HeadStatGaugeVisibilityRangeSquared);
 	}
+}
+
+void ATfsCharacter::SetStatusGaugeVisibility(bool bIsVisibility)
+{
+	GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);
+	if (bIsVisibility)
+	{
+		ConfigureOverHeadStatusWidget();
+	}
+	else
+	{
+		OverHeadWidgetComponent->SetHiddenInGame(true);
+	}
+}
+
+void ATfsCharacter::StartDeathSequence()
+{
+	OnDead();
+	PlayDeathMontage();
+	SetStatusGaugeVisibility(false);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ATfsCharacter::StartRespawnSequence()
+{
+	OnRespawn();
+	SetRagdollEnabled(false);
+	SetStatusGaugeVisibility(true);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
+
+	if (TfsAbilitySystemComponent)
+		TfsAbilitySystemComponent->ApplyFullStatEffect();
+}
+
+void ATfsCharacter::PlayDeathMontage()
+{
+	if (DeathMontage)
+	{
+		float MontageDuration = PlayAnimMontage(DeathMontage);
+		GetWorldTimerManager().SetTimer(DeathMontageTimerHandle, this, &ATfsCharacter::DeathMontageFinished, MontageDuration + DeathMontageFinishTimeShift);
+	}
+}
+
+void ATfsCharacter::DeathMontageFinished() const
+{
+	SetRagdollEnabled(true);
+}
+
+void ATfsCharacter::SetRagdollEnabled(bool bIsEnabled) const
+{
+	if (bIsEnabled)
+	{
+		GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	}
+	else
+	{
+		GetMesh()->SetSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
+	}
+}
+
+void ATfsCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID = NewTeamID;
+}
+
+FGenericTeamId ATfsCharacter::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+void ATfsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ATfsCharacter, TeamID);
 }
 

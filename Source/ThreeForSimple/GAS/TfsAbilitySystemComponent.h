@@ -15,10 +15,22 @@ class THREEFORSIMPLE_API UTfsAbilitySystemComponent : public UAbilitySystemCompo
 	GENERATED_BODY()
 
 public:
+	UTfsAbilitySystemComponent();
+	
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
-	
+
+	void ApplyFullStatEffect();
 private:
+	void AuthApplyGameplayEffect(const TSubclassOf<UGameplayEffect>& GameplayEffect, int Level = 1);
+
+	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+	TSubclassOf<UGameplayEffect> FullStatEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+	TSubclassOf<UGameplayEffect> DeathEffect;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
 

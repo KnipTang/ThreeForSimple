@@ -17,4 +17,5 @@ class THREEFORSIMPLE_API UTfsAbilitySystemStatics : public UBlueprintFunctionLib
 
 public:
 	static FGameplayTag GetMeleeAttackAbilityTag();
+	static FGameplayTag GetDeadStatTag();
 };

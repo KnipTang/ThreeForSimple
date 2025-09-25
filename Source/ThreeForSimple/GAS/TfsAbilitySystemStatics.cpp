@@ -7,3 +7,8 @@ FGameplayTag UTfsAbilitySystemStatics::GetMeleeAttackAbilityTag()
 {
 	return FGameplayTag::RequestGameplayTag("Ability.MeleeAttack");
 }
+
+FGameplayTag UTfsAbilitySystemStatics::GetDeadStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Dead");
+}

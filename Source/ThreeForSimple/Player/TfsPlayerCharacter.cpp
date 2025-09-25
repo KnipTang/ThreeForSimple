@@ -78,3 +78,19 @@ void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& Inp
 	else
 		GetAbilitySystemComponent()->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
 }
+
+void ATfsPlayerCharacter::OnDead()
+{
+	if (APlayerController* PlayerController = GetController<APlayerController>())
+	{
+		DisableInput(PlayerController);
+	}
+}
+
+void ATfsPlayerCharacter::OnRespawn()
+{
+	if (APlayerController* PlayerController = GetController<APlayerController>())
+	{
+		EnableInput(PlayerController);
+	}
+}

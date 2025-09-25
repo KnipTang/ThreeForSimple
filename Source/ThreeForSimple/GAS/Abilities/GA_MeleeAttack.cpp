@@ -86,7 +86,7 @@ void UGA_MeleeAttack::TryCommitNextCombo() const
 
 void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
 {
-	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, true, true);
+	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius);
 
 	for (const FHitResult& Result : HitResults)
 	{

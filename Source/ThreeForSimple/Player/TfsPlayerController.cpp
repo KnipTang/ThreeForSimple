@@ -5,6 +5,7 @@
 
 #include "TfsPlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "ThreeForSimple/Widgets/GameplayWidget.h"
 
 void ATfsPlayerController::OnPossess(APawn* NewPawn)
@@ -15,6 +16,7 @@ void ATfsPlayerController::OnPossess(APawn* NewPawn)
 	if (TfsPlayerCharacter)
 	{
 		TfsPlayerCharacter->ServerSideInit();
+		TfsPlayerCharacter->SetGenericTeamId(TeamID);
 	}
 }
 
@@ -44,4 +46,21 @@ void ATfsPlayerController::SpawnGameplayWidget()
 	{
 		GameplayWidget->AddToViewport();
 	}
+}
+
+void ATfsPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID = NewTeamID;
+}
+
+FGenericTeamId ATfsPlayerController::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+void ATfsPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ATfsPlayerController, TeamID);
 }

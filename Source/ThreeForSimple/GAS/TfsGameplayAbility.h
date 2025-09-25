@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "GenericTeamAgentInterface.h"
 #include "TfsGameplayAbility.generated.h"
 
 /**
@@ -17,6 +18,6 @@ class THREEFORSIMPLE_API UTfsGameplayAbility : public UGameplayAbility
 public:
 	UAnimInstance* GetAnimationInstance() const;
 	
-	TArray<FHitResult> GetHitResultFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius,
-		bool bDrawDebug, bool bIgnoreSelf) const;
+	TArray<FHitResult> GetHitResultFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius = 30.f,
+		ETeamAttitude::Type TargetTeam = ETeamAttitude::Hostile, bool bDrawDebug = false, bool bIgnoreSelf = true) const;
 };
