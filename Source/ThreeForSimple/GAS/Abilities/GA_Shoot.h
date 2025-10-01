@@ -19,6 +19,7 @@ public:
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
@@ -33,6 +34,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	FName ShootSocketName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Aim")
+	const TSubclassOf<UAnimInstance> AimnAnimInstance;
 	UPROPERTY(EditDefaultsOnly, Category = "Anim")
 	UAnimMontage* ShootMontage;
 	
@@ -63,7 +66,7 @@ private:
 	void FindAimTarget();
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Target")
-	float AimTargetCheckTimeInterval = 0.1f;
+	float AimTargetCheckTimeInterval = 0.01f;
 	
 	void StartAimTargetCheckTimer();
 	void StopAimTargetCheckTimer();

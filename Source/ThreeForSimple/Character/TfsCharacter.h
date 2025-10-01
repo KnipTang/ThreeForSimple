@@ -38,10 +38,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetAnimInstance(const TSubclassOf<UAnimInstance>& AnimInstance);
-
+	void ResetAnimInstanceToDefault();
+	
 private:
 	UPROPERTY()
-	TSubclassOf<UAnimInstance> DefaultAnimInstance;
+	UClass* DefaultAnimInstance;
 	//***********************************************************//
 	//					Gameplay Ability system
 	//***********************************************************//
@@ -83,19 +84,14 @@ private:
 	//							Weapon							 //
 	//***********************************************************//
 public:
-	void OnEquipWeapon();
-	void OnUnequipWeapon();
-
 	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void SetIsAiming(const bool bIsAiming);
 	virtual void OnAimStateChanged(const bool bIsAiming) {};
-private:
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	const TSubclassOf<UAnimInstance> WeaponAnimInstance;
 	
 	//***********************************************************//
     //						Death and Respawn					 //
     //***********************************************************//
+private:
 	FTransform MeshRelativeTransform;
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	float DeathMontageFinishTimeShift = -0.8f;

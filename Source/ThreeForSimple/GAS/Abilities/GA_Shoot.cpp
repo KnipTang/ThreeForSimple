@@ -8,6 +8,7 @@
 #include "ProjectileActor.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "ThreeForSimple/Character/TfsCharacter.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 
 UGA_Shoot::UGA_Shoot()
@@ -49,6 +50,9 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		WaitShootProjectileEvent->EventReceived.AddDynamic(this, &UGA_Shoot::ShootProjectile);
 		WaitShootProjectileEvent->ReadyForActivation();
 	}
+
+	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
+		OwningCharacter->SetAnimInstance(AimnAnimInstance);
 }
 
 void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -57,6 +61,21 @@ void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGa
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
 	UE_LOG(LogTemp, Warning, TEXT("Shoot ability ended"));
 	K2_EndAbility();
+}
+
+void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	if (AimTargetAbilitySystemComponent)
+	{
+		AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetDeadStatTag()).RemoveAll(this);
+		AimTargetAbilitySystemComponent = nullptr;
+	}
+	
+	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
+		OwningCharacter->ResetAnimInstanceToDefault();
+	
+	StopShooting(FGameplayEventData());
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)

@@ -15,6 +15,8 @@ class THREEFORSIMPLE_API UTfsGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	UTfsGameplayAbility();
 protected:
 	UAnimInstance* GetAnimationInstance() const;
 	
@@ -33,7 +35,11 @@ protected:
 	UFUNCTION()
 	FORCEINLINE bool ShouldDrawDebug() const { return bShouldDrawDebug; }
 
+	ACharacter* GetOwningCharacter();
 private:
+	UPROPERTY()
+	class ACharacter* OwnerCharacter;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Debug")
 	bool bShouldDrawDebug = false;
 };

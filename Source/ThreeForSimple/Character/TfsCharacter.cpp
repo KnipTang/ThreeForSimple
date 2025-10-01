@@ -27,11 +27,6 @@ ATfsCharacter::ATfsCharacter()
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 
 	BindGASChangeDelegate();
-
-	if (USkeletalMeshComponent* MeshComp = GetMesh())
-	{
-		DefaultAnimInstance = MeshComp->GetAnimClass();
-	}
 }
 
 void ATfsCharacter::ServerSideInit()
@@ -69,6 +64,11 @@ void ATfsCharacter::BeginPlay()
 
 	ConfigureOverHeadStatusWidget();
 	MeshRelativeTransform = GetMesh()->GetRelativeTransform();
+
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		DefaultAnimInstance = MeshComp->GetAnimClass();
+	}
 }
 
 // Called every frame
@@ -91,6 +91,11 @@ void ATfsCharacter::SetAnimInstance(const TSubclassOf<UAnimInstance>& AnimInstan
 	{
 		MeshComp->SetAnimInstanceClass(AnimInstance);
 	}
+}
+
+void ATfsCharacter::ResetAnimInstanceToDefault()
+{
+	SetAnimInstance(DefaultAnimInstance);
 }
 
 UAbilitySystemComponent* ATfsCharacter::GetAbilitySystemComponent() const
@@ -168,16 +173,6 @@ void ATfsCharacter::SetStatusGaugeVisibility(bool bIsVisibility)
 	{
 		OverHeadWidgetComponent->SetHiddenInGame(true);
 	}
-}
-
-void ATfsCharacter::OnEquipWeapon()
-{
-	SetAnimInstance(WeaponAnimInstance);
-}
-
-void ATfsCharacter::OnUnequipWeapon()
-{
-	SetAnimInstance(DefaultAnimInstance);
 }
 
 void ATfsCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)

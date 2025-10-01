@@ -5,6 +5,11 @@
 
 #include "AbilitySystemComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/Character.h"
+
+UTfsGameplayAbility::UTfsGameplayAbility()
+{
+}
 
 UAnimInstance* UTfsGameplayAbility::GetAnimationInstance() const
 {
@@ -136,5 +141,15 @@ FGenericTeamId UTfsGameplayAbility::GetOwnerTeamId() const
 	}
 
 	return FGenericTeamId::NoTeam;
+}
+
+ACharacter* UTfsGameplayAbility::GetOwningCharacter()
+{
+	if (!OwnerCharacter)
+	{
+		OwnerCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	}
+
+	return OwnerCharacter;
 }
 

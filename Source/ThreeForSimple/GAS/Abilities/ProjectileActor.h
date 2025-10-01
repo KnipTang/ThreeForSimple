@@ -48,11 +48,13 @@ private:
 	UPROPERTY(Replicated)
 	float ProjectileSpeed;
 
+	UPROPERTY(Replicated)
+	int TargetTeamAttitude;
+
 	UPROPERTY()
 	const AActor* Target;
 	
 	FGameplayEffectSpecHandle HitEffectSpecHandle;
-	ETeamAttitude::Type TargetTeamAttitude;
 	
 	FTimerHandle ShootTimerHandle;
 protected:
