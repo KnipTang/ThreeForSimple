@@ -37,11 +37,19 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SetAnimInstance(const TSubclassOf<UAnimInstance>& AnimInstance);
+
+private:
+	UPROPERTY()
+	TSubclassOf<UAnimInstance> DefaultAnimInstance;
 	//***********************************************************//
 	//					Gameplay Ability system
 	//***********************************************************//
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SendGameplayEventToSelf(const FGameplayTag& EventTag, const FGameplayEventData& EventData);
 private:
 	void BindGASChangeDelegate();
 	void DeathTagUpdated(const FGameplayTag Tag, int32 NewCount);
@@ -70,6 +78,20 @@ private:
 
 	void UpdateHeadGaugeVisibility();
 	void SetStatusGaugeVisibility(bool bIsVisibility);
+	
+	//***********************************************************//
+	//							Weapon							 //
+	//***********************************************************//
+public:
+	void OnEquipWeapon();
+	void OnUnequipWeapon();
+
+	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	void SetIsAiming(const bool bIsAiming);
+	virtual void OnAimStateChanged(const bool bIsAiming) {};
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	const TSubclassOf<UAnimInstance> WeaponAnimInstance;
 	
 	//***********************************************************//
     //						Death and Respawn					 //

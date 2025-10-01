@@ -3,6 +3,7 @@
 
 #include "TfsCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -26,6 +27,11 @@ ATfsCharacter::ATfsCharacter()
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 
 	BindGASChangeDelegate();
+
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		DefaultAnimInstance = MeshComp->GetAnimClass();
+	}
 }
 
 void ATfsCharacter::ServerSideInit()
@@ -79,9 +85,27 @@ void ATfsCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ATfsCharacter::SetAnimInstance(const TSubclassOf<UAnimInstance>& AnimInstance)
+{
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		MeshComp->SetAnimInstanceClass(AnimInstance);
+	}
+}
+
 UAbilitySystemComponent* ATfsCharacter::GetAbilitySystemComponent() const
 {
 	return TfsAbilitySystemComponent;
+}
+
+void ATfsCharacter::Server_SendGameplayEventToSelf_Implementation(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, EventData);
+}
+
+bool ATfsCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+	return true;
 }
 
 void ATfsCharacter::BindGASChangeDelegate()
@@ -89,6 +113,7 @@ void ATfsCharacter::BindGASChangeDelegate()
 	if (TfsAbilitySystemComponent)
 	{
 		TfsAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetDeadStatTag()).AddUObject(this, &ATfsCharacter::DeathTagUpdated);
+		TfsAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetAimStatTag()).AddUObject(this, &ATfsCharacter::AimTagUpdated);
 	}
 }
 
@@ -143,6 +168,28 @@ void ATfsCharacter::SetStatusGaugeVisibility(bool bIsVisibility)
 	{
 		OverHeadWidgetComponent->SetHiddenInGame(true);
 	}
+}
+
+void ATfsCharacter::OnEquipWeapon()
+{
+	SetAnimInstance(WeaponAnimInstance);
+}
+
+void ATfsCharacter::OnUnequipWeapon()
+{
+	SetAnimInstance(DefaultAnimInstance);
+}
+
+void ATfsCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	SetIsAiming(NewCount != 0);
+}
+
+void ATfsCharacter::SetIsAiming(const bool bIsAiming)
+{
+	bUseControllerRotationYaw = bIsAiming;
+	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+	OnAimStateChanged(bIsAiming);
 }
 
 void ATfsCharacter::StartDeathSequence()

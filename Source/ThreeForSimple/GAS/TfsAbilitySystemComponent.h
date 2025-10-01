@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "TfsGameplayAbilityTypes.h"
 #include "TfsAbilitySystemComponent.generated.h"
 
 /**
@@ -36,9 +37,9 @@ private:
 
 	//Abilities that you already have from the beginning of the game
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> BasicAbilities;
+	TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BasicAbilities;
 	
 	//Abilities you learn during game
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> AddedAbilities;
+	TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AddedAbilities;
 };

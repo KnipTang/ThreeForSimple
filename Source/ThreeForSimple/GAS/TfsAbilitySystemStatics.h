@@ -17,5 +17,13 @@ class THREEFORSIMPLE_API UTfsAbilitySystemStatics : public UBlueprintFunctionLib
 
 public:
 	static FGameplayTag GetMeleeAttackAbilityTag();
+	static FGameplayTag GetBasicAttackInputPressedTag();
+	static FGameplayTag GetBasicAttackInputReleasedTag();
 	static FGameplayTag GetDeadStatTag();
+	static FGameplayTag GetAimStatTag();
+	static FGameplayTag GetCrosshairStatTag();
+	static FGameplayTag GetTargetUpdatedTag();
+
+	static bool IsActorDead(const AActor* ActorToCheck);
+	static bool ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag);
 };

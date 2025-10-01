@@ -20,7 +20,8 @@ public:
 
 	virtual void PawnClientRestart() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+	virtual void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "View")
 	class USpringArmComponent* CameraBoom;
@@ -53,4 +54,24 @@ private:
 	/***************************************************/
 	virtual void OnDead() override;
 	virtual void OnRespawn() override;
+
+	/***************************************************/
+	/*					Camera View						/
+	/***************************************************/
+private:
+	void LerpCameraToLocalOffsetLocation(const FVector& LerpedCameraLocGoal);
+	void TickCameraLocalOffsetLerp(const FVector LerpedCameraLocGoal);
+	
+	UPROPERTY(EditDefaultsOnly, Category = "View")
+	FVector CameraAimLocalOffset;
+
+	UPROPERTY(EditDefaultsOnly, Category = "View")
+	float CameraLerpSpeed = 20.f;
+
+	FTimerHandle CameraLerpTimerHandle;
+
+	/***************************************************/
+	/*					  Weapon						/
+	/***************************************************/
+	virtual void OnAimStateChanged(const bool bIsAiming) override;
 };

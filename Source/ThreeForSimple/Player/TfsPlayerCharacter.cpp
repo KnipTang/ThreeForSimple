@@ -3,12 +3,14 @@
 
 #include "TfsPlayerCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AbilitySystemComponent.h"
+#include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 
 ATfsPlayerCharacter::ATfsPlayerCharacter()
 {
@@ -53,6 +55,12 @@ void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	}
 }
 
+void ATfsPlayerCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+{
+	OutLocation = ViewCam->GetComponentLocation();
+	OutRotation = ViewCam->GetComponentRotation();
+}
+
 void ATfsPlayerCharacter::HandleMoveInput(const struct FInputActionValue& InputActionValue)
 {
 	FVector2D InputVal = InputActionValue.Get<FVector2D>();
@@ -73,10 +81,22 @@ void ATfsPlayerCharacter::HandleLookInput(const struct FInputActionValue& InputA
 
 void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID)
 {
-	if (bool bPressed = InputActionValue.Get<bool>())
+	bool bPressed = InputActionValue.Get<bool>();
+	
+	if (bPressed)
 		GetAbilitySystemComponent()->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
 	else
 		GetAbilitySystemComponent()->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
+
+	if (AbilityInputID == ECAbilityInputID::BasicAttack)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BasicPressed"));
+
+		FGameplayTag BasicAttackTag = bPressed ? UTfsAbilitySystemStatics::GetBasicAttackInputPressedTag() : UTfsAbilitySystemStatics::GetBasicAttackInputReleasedTag();
+		//This only gets called on the client. Therefor another function (Server_SendGameplayEventToSelf in CCharacter) Is needed to communicate this to the server
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, BasicAttackTag, FGameplayEventData());
+		Server_SendGameplayEventToSelf(BasicAttackTag, FGameplayEventData());
+	}
 }
 
 void ATfsPlayerCharacter::OnDead()
@@ -93,4 +113,32 @@ void ATfsPlayerCharacter::OnRespawn()
 	{
 		EnableInput(PlayerController);
 	}
+}
+
+void ATfsPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& LerpedCameraLocGoal)
+{
+	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
+}
+
+void ATfsPlayerCharacter::TickCameraLocalOffsetLerp(const FVector LerpedCameraLocGoal)
+{
+	FVector CurrentLocalOffset = ViewCam->GetRelativeLocation();
+	//If the camera is pretty close to the goal location just set it.
+	if(FVector::Dist(CurrentLocalOffset, LerpedCameraLocGoal) < 1.f)
+	{
+		ViewCam->SetRelativeLocation(LerpedCameraLocGoal);
+		return;
+	}
+
+	float LerpAlpha = FMath::Clamp(GetWorld()->GetDeltaSeconds() * CameraLerpSpeed, 0.f, 1.f);
+	FVector NewLocalOffset = FMath::Lerp(CurrentLocalOffset, LerpedCameraLocGoal, LerpAlpha);
+	ViewCam->SetRelativeLocation(NewLocalOffset);
+
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
+}
+
+void ATfsPlayerCharacter::OnAimStateChanged(const bool bIsAiming)
+{
+	LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector{0.f});
 }

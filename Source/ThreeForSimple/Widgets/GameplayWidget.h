@@ -23,4 +23,7 @@ private:
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* HealthBar;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCrosshairWidget* CrosshairWidget;
 };

@@ -36,13 +36,13 @@ void UTfsAbilitySystemComponent::GiveInitialAbilities()
 	if(!GetOwner() || !GetOwner()->HasAuthority())
 		return;
 	
-	for (const TSubclassOf<UGameplayAbility>& AbilityPar : AddedAbilities)
+	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : AddedAbilities)
 	{
-		GiveAbility(FGameplayAbilitySpec(AbilityPar, 0, (int32)1, nullptr));
+		GiveAbility(FGameplayAbilitySpec(AbilityPar.Value, 0, static_cast<int32>(AbilityPar.Key), nullptr));
 	}
-	for (const TSubclassOf<UGameplayAbility>& AbilityPar : BasicAbilities)
+	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : BasicAbilities)
 	{
-		GiveAbility(FGameplayAbilitySpec(AbilityPar, 1, (int32)1, nullptr));
+		GiveAbility(FGameplayAbilitySpec(AbilityPar.Value, 1, static_cast<int32>(AbilityPar.Key), nullptr));
 	}
 }
 
