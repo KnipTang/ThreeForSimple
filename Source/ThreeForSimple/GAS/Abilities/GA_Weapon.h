@@ -4,55 +4,58 @@
 
 #include "CoreMinimal.h"
 #include "ThreeForSimple/GAS/TfsGameplayAbility.h"
-#include "GA_Shoot.generated.h"
+#include "GA_Weapon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class THREEFORSIMPLE_API UGA_Shoot : public UTfsGameplayAbility
+class THREEFORSIMPLE_API UGA_Weapon : public UTfsGameplayAbility
 {
 	GENERATED_BODY()
-
+	
 public:
-	UGA_Shoot();
+	UGA_Weapon();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-private:
-	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-	TSubclassOf<class AProjectileActor> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-	TSubclassOf<UGameplayEffect> ProjectileHitEffect;
-	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-	float ShootProjectileSpeed = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-	float ShootProjectileRange = 3000.f;
+protected:
+	UFUNCTION()
+	virtual void StartShooting(FGameplayEventData PayLoad);
+	UFUNCTION()
+	virtual void StopShooting(FGameplayEventData PayLoad);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-	FName ShootSocketName;
+	UFUNCTION()
+	virtual void Shoot(FGameplayEventData PayLoad);
 
+	static FGameplayTag GetWeaponTag();
+
+	//Config
+	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+	float ShootRange = 3000.f;
+
+	//Animations
 	UPROPERTY(EditDefaultsOnly, Category = "Aim")
-	const TSubclassOf<UAnimInstance> AimnAnimInstance;
-	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	const TSubclassOf<UAnimInstance> AimAnimInstance;
+	UPROPERTY(EditDefaultsOnly, Category = "Aim")
 	UAnimMontage* ShootMontage;
-	
-	UFUNCTION()
-	void StartShooting(FGameplayEventData PayLoad);
-	UFUNCTION()
-	void StopShooting(FGameplayEventData PayLoad);
-
-	UFUNCTION()
-	void ShootProjectile(FGameplayEventData PayLoad);
-	AActor* GetAimTargetIfValid() const;
-
-	static FGameplayTag GetShootTag();
-
 	/***************************************************/
 	/*			   Find if aiming at target			    /
 	/***************************************************/
+	AActor* GetAimTargetIfValid() const;
+
+	void FindAimTarget();
+	
+	void StartAimTargetCheckTimer();
+	void StopAimTargetCheckTimer();
+
+	bool HasValidTarget() const;
+	bool IsTargetInRange() const;
+
+	void TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	
 	UPROPERTY()
 	AActor* CurrentAimTarget;
 	UPROPERTY()
@@ -63,16 +66,6 @@ private:
 	
 	FTimerHandle AimTargetCheckTimerHandle;
 	
-	void FindAimTarget();
-	
 	UPROPERTY(EditDefaultsOnly, Category = "Target")
 	float AimTargetCheckTimeInterval = 0.01f;
-	
-	void StartAimTargetCheckTimer();
-	void StopAimTargetCheckTimer();
-
-	bool HasValidTarget() const;
-	bool IsTargetInRange() const;
-
-	void TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount);
 };

@@ -1,24 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GA_Shoot.h"
+#include "GA_Weapon.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "ProjectileActor.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "ThreeForSimple/Character/TfsCharacter.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 
-UGA_Shoot::UGA_Shoot()
+UGA_Weapon::UGA_Weapon()
 {
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
 }
 
-void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-                                const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UGA_Weapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -28,34 +27,34 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Shoot ability activated"));
+	UE_LOG(LogTemp, Warning, TEXT("Hitscan ability activated"));
 
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
 		FindAimTarget();
 		StartAimTargetCheckTimer();
 		
-		//Start shooting
+		//Start hitscan
 		UAbilityTask_WaitGameplayEvent* WaitStartShootingEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, UTfsAbilitySystemStatics::GetBasicAttackInputPressedTag());
-		WaitStartShootingEvent->EventReceived.AddDynamic(this, &UGA_Shoot::StartShooting);
+		WaitStartShootingEvent->EventReceived.AddDynamic(this, &UGA_Weapon::StartShooting);
 		WaitStartShootingEvent->ReadyForActivation();
 
-		//Stop shooting
+		//Stop hitscan
 		UAbilityTask_WaitGameplayEvent* WaitStopShootingEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, UTfsAbilitySystemStatics::GetBasicAttackInputReleasedTag());
-		WaitStopShootingEvent->EventReceived.AddDynamic(this, &UGA_Shoot::StopShooting);
+		WaitStopShootingEvent->EventReceived.AddDynamic(this, &UGA_Weapon::StopShooting);
 		WaitStopShootingEvent->ReadyForActivation();
 
-		//Shooting projectile
-		UAbilityTask_WaitGameplayEvent* WaitShootProjectileEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,  GetShootTag(), nullptr, false, false);
-		WaitShootProjectileEvent->EventReceived.AddDynamic(this, &UGA_Shoot::ShootProjectile);
+		//Shooting hitscan
+		UAbilityTask_WaitGameplayEvent* WaitShootProjectileEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,  GetWeaponTag(), nullptr, false, false);
+		WaitShootProjectileEvent->EventReceived.AddDynamic(this, &UGA_Weapon::Shoot);
 		WaitShootProjectileEvent->ReadyForActivation();
 	}
 
 	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
-		OwningCharacter->SetAnimInstance(AimnAnimInstance);
+		OwningCharacter->SetAnimInstance(AimAnimInstance);
 }
 
-void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UGA_Weapon::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo)
 {
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
@@ -63,7 +62,8 @@ void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGa
 	K2_EndAbility();
 }
 
-void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	if (AimTargetAbilitySystemComponent)
 	{
@@ -78,10 +78,8 @@ void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
+void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
-
 	if (!ShootMontage)
 		return;
 	
@@ -97,9 +95,8 @@ void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 	}
 }
 
-void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
+void UGA_Weapon::StopShooting(FGameplayEventData PayLoad)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Stop"));
 	if (UAnimInstance* OwnerAnimInst = GetAnimationInstance())
 	{
 		FName CurrentSectionName = OwnerAnimInst->Montage_GetCurrentSection(ShootMontage);
@@ -107,28 +104,16 @@ void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 	}
 }
 
-void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
+void UGA_Weapon::Shoot(FGameplayEventData PayLoad)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Projectile"));
-	if (K2_HasAuthority())
-	{
-		AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo();
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = OwnerAvatarActor;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		FVector SocketLocation = GetAvatarActorFromActorInfo()->GetActorLocation();
-		if (USkeletalMeshComponent* MeshComp = GetOwningComponentFromActorInfo())
-			SocketLocation = MeshComp->GetSocketLocation(ShootSocketName);
-		
-		if (AProjectileActor* Projectile = GetWorld()->SpawnActor<AProjectileActor>(ProjectileClass, SocketLocation, OwnerAvatarActor->GetActorRotation(), SpawnParams))
-		{
-			Projectile->ShootProjectile(ShootProjectileSpeed, ShootProjectileRange, GetAimTargetIfValid(), GetOwnerTeamId(), MakeOutgoingGameplayEffectSpec(ProjectileHitEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo)));
-		}
-	}
 }
 
-AActor* UGA_Shoot::GetAimTargetIfValid() const
+FGameplayTag UGA_Weapon::GetWeaponTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.Weapon");
+}
+
+AActor* UGA_Weapon::GetAimTargetIfValid() const
 {
 	if (HasValidTarget())
 		return CurrentAimTarget;
@@ -136,14 +121,10 @@ AActor* UGA_Shoot::GetAimTargetIfValid() const
 	return nullptr;
 }
 
-FGameplayTag UGA_Shoot::GetShootTag()
-{
-	return FGameplayTag::RequestGameplayTag("Ability.Shoot");
-}
 
-void UGA_Shoot::FindAimTarget()
+void UGA_Weapon::FindAimTarget()
 {
-	NewAimTarget = GetAimTarget(ShootProjectileRange, ETeamAttitude::Hostile);
+	NewAimTarget = GetAimTarget(ShootRange, ETeamAttitude::Hostile);
 	
 	if (HasValidTarget())
 		return;
@@ -164,7 +145,7 @@ void UGA_Shoot::FindAimTarget()
 	{
 		AimTargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(CurrentAimTarget);
 		if (AimTargetAbilitySystemComponent)
-			AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetDeadStatTag()).AddUObject(this, &UGA_Shoot::TargetDeadTagUpdated);
+			AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UTfsAbilitySystemStatics::GetDeadStatTag()).AddUObject(this, &UGA_Weapon::TargetDeadTagUpdated);
 	}
 
 	FGameplayEventData EventData;
@@ -172,19 +153,19 @@ void UGA_Shoot::FindAimTarget()
 	SendLocalGameplayEvent(UTfsAbilitySystemStatics::GetTargetUpdatedTag(), EventData);
 }
 
-void UGA_Shoot::StartAimTargetCheckTimer()
+void UGA_Weapon::StartAimTargetCheckTimer()
 {
 	if (UWorld* World = GetWorld())
-		World->GetTimerManager().SetTimer(AimTargetCheckTimerHandle, this, &UGA_Shoot::FindAimTarget,AimTargetCheckTimeInterval,  true);
+		World->GetTimerManager().SetTimer(AimTargetCheckTimerHandle, this, &UGA_Weapon::FindAimTarget,AimTargetCheckTimeInterval,  true);
 }
 
-void UGA_Shoot::StopAimTargetCheckTimer()
+void UGA_Weapon::StopAimTargetCheckTimer()
 {
 	if (UWorld* World = GetWorld())
 		World->GetTimerManager().ClearTimer(AimTargetCheckTimerHandle);
 }
 
-bool UGA_Shoot::HasValidTarget() const
+bool UGA_Weapon::HasValidTarget() const
 {
 	if (!NewAimTarget)
 		return false;
@@ -198,17 +179,18 @@ bool UGA_Shoot::HasValidTarget() const
 	return true;
 }
 
-bool UGA_Shoot::IsTargetInRange() const
+bool UGA_Weapon::IsTargetInRange() const
 {
 	if (!CurrentAimTarget)
 		return false;
 
 	float Distance = FVector::Distance(CurrentAimTarget->GetActorLocation(), GetAvatarActorFromActorInfo()->GetActorLocation());
-	return Distance <= ShootProjectileRange;
+	return Distance <= ShootRange;
 }
 
-void UGA_Shoot::TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount)
+void UGA_Weapon::TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
 	if (NewCount > 0)
 		FindAimTarget();
 }
+
