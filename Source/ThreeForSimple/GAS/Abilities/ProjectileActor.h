@@ -67,6 +67,4 @@ public:
 
 private:
 	void TravelMaxDistanceReached();
-	void SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult);
-
 };

@@ -8,6 +8,7 @@
 #include "AbilitySystemGlobals.h"
 #include "GameplayCueManager.h"
 #include "Net/UnrealNetwork.h"
+#include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 
 // Sets default values
 AProjectileActor::AProjectileActor()
@@ -23,45 +24,26 @@ AProjectileActor::AProjectileActor()
 
 void AProjectileActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	//Super::NotifyActorBeginOverlap(OtherActor);
-
-	UE_LOG(LogTemp, Warning, TEXT("BeginOverlap - OtherActor: %s, Owner: %s"), 
-		*GetNameSafe(OtherActor), *GetNameSafe(GetOwner()));
+	AActor* OwningActor = GetOwner();
 	
-	if (!OtherActor || OtherActor == GetOwner())
+	if (!OtherActor || OtherActor == OwningActor)
 		return;
-
-	UE_LOG(LogTemp, Warning, TEXT("OWner"));
-
-
-	if (static_cast<int>(GetTeamAttitudeTowards(*OtherActor)) != TargetTeamAttitude)
+	
+	if (GetTeamAttitudeTowards(*OtherActor) != TargetTeamAttitude)
 		return;
+	
+	UTfsAbilitySystemStatics::ApplyEffect(OwningActor, OtherActor, HitEffectSpecHandle);
 
-	UE_LOG(LogTemp, Warning, TEXT("Team"));
-
-
-	UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor);
-	if (IsValid(OtherASC))
+	FHitResult HitResult;
+	HitResult.ImpactPoint = GetActorLocation();
+	HitResult.ImpactNormal = GetActorForwardVector();
+	UTfsAbilitySystemStatics::SendLocalGameplayCue(OtherActor, HitResult, HitGameplayCueTag);
+	
+	if (HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("FoundASC"));
-
-		if (HasAuthority() && HitEffectSpecHandle.IsValid())
-		{
-			OtherASC->ApplyGameplayEffectSpecToSelf(*HitEffectSpecHandle.Data.Get());
-			GetWorldTimerManager().ClearTimer(ShootTimerHandle);
-		}
-
-		FHitResult HitResult;
-		HitResult.ImpactPoint = GetActorLocation();
-		HitResult.ImpactNormal = GetActorForwardVector();
-		SendLocalGameplayCue(OtherActor, HitResult);
-
-		UE_LOG(LogTemp, Warning, TEXT("One"));
-		
+		GetWorldTimerManager().ClearTimer(ShootTimerHandle);
 		Destroy();
 	}
-	else
-		UE_LOG(LogTemp, Warning, TEXT("NOTFoundASC"));
 }
 
 void AProjectileActor::ShootProjectile(float InSpeed, float InMaxDistance, const AActor* InTarget,
@@ -103,6 +85,7 @@ void AProjectileActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AProjectileActor, MoveDir);
 	DOREPLIFETIME(AProjectileActor, TeamId);
 	DOREPLIFETIME(AProjectileActor, ProjectileSpeed);
+	DOREPLIFETIME(AProjectileActor, TargetTeamAttitude);
 }
 
 void AProjectileActor::SetGenericTeamId(const FGenericTeamId& NewTeamID)
@@ -132,14 +115,5 @@ void AProjectileActor::Tick(float DeltaTime)
 void AProjectileActor::TravelMaxDistanceReached()
 {
 	Destroy();
-}
-
-void AProjectileActor::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult)
-{
-	FGameplayCueParameters CueParams;
-	CueParams.Location = HitResult.ImpactPoint;
-	CueParams.Normal = HitResult.ImpactNormal;
-
-	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(CueTargetActor, HitGameplayCueTag, EGameplayCueEvent::Executed, CueParams);
 }
 

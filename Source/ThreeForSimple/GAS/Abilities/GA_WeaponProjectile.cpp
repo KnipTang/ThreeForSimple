@@ -15,7 +15,6 @@ void UGA_WeaponProjectile::Shoot(FGameplayEventData PayLoad)
 {
 	Super::Shoot(PayLoad);
 
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Projectile"));
 	if (K2_HasAuthority())
 	{
 		AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo();

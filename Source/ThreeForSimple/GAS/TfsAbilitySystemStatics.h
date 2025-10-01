@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TfsAbilitySystemStatics.generated.h"
 
@@ -24,6 +25,9 @@ public:
 	static FGameplayTag GetCrosshairStatTag();
 	static FGameplayTag GetTargetUpdatedTag();
 
+	static void ApplyEffect(AActor* OwnerActor, AActor* OtherActor, const struct FGameplayEffectSpecHandle& EffectSpecHandle);
+	static void SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult, const FGameplayTag& HitGameplayCueTag);
+	
 	static bool IsActorDead(const AActor* ActorToCheck);
 	static bool ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag);
 };

@@ -16,4 +16,9 @@ class THREEFORSIMPLE_API UGA_WeaponHitscan : public UGA_Weapon
 	
 protected:
 	virtual void Shoot(FGameplayEventData PayLoad) override;
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Cue")
+	FGameplayTag HitGameplayCueTag;
+	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+	TSubclassOf<UGameplayEffect> HitscanHitEffect;
 };

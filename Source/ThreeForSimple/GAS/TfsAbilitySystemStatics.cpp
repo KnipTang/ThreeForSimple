@@ -2,9 +2,11 @@
 
 
 #include "TfsAbilitySystemStatics.h"
-
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayCueManager.h"
 
 FGameplayTag UTfsAbilitySystemStatics::GetMeleeAttackAbilityTag()
 {
@@ -39,6 +41,27 @@ FGameplayTag UTfsAbilitySystemStatics::GetCrosshairStatTag()
 FGameplayTag UTfsAbilitySystemStatics::GetTargetUpdatedTag()
 {
 	return FGameplayTag::RequestGameplayTag("Target.Updated");
+}
+
+void UTfsAbilitySystemStatics::ApplyEffect(AActor* OwnerActor, AActor* OtherActor, const FGameplayEffectSpecHandle& EffectSpecHandle)
+{
+	UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor);
+	if (IsValid(OtherASC))
+	{
+		if (OwnerActor->HasAuthority() && EffectSpecHandle.IsValid())
+		{
+			OtherASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+		}
+	}
+}
+
+void UTfsAbilitySystemStatics::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult, const FGameplayTag& HitGameplayCueTag)
+{
+	FGameplayCueParameters CueParams;
+	CueParams.Location = HitResult.ImpactPoint;
+	CueParams.Normal = HitResult.ImpactNormal;
+
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(CueTargetActor, HitGameplayCueTag, EGameplayCueEvent::Executed, CueParams);
 }
 
 bool UTfsAbilitySystemStatics::IsActorDead(const AActor* ActorToCheck)

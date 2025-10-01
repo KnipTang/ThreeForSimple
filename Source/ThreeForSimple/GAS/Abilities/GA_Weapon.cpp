@@ -27,8 +27,6 @@ void UGA_Weapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Hitscan ability activated"));
-
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
 		FindAimTarget();
@@ -58,7 +56,6 @@ void UGA_Weapon::InputReleased(const FGameplayAbilitySpecHandle Handle, const FG
 	const FGameplayAbilityActivationInfo ActivationInfo)
 {
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
-	UE_LOG(LogTemp, Warning, TEXT("Shoot ability ended"));
 	K2_EndAbility();
 }
 
