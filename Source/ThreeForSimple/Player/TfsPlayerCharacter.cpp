@@ -118,7 +118,7 @@ void ATfsPlayerCharacter::OnRespawn()
 void ATfsPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& LerpedCameraLocGoal)
 {
 	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
-	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
+	CameraLerpTimerHandle = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
 }
 
 void ATfsPlayerCharacter::TickCameraLocalOffsetLerp(const FVector LerpedCameraLocGoal)
@@ -135,7 +135,7 @@ void ATfsPlayerCharacter::TickCameraLocalOffsetLerp(const FVector LerpedCameraLo
 	FVector NewLocalOffset = FMath::Lerp(CurrentLocalOffset, LerpedCameraLocGoal, LerpAlpha);
 	ViewCam->SetRelativeLocation(NewLocalOffset);
 
-	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
+	CameraLerpTimerHandle = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ATfsPlayerCharacter::TickCameraLocalOffsetLerp, LerpedCameraLocGoal));
 }
 
 void ATfsPlayerCharacter::OnAimStateChanged(const bool bIsAiming)

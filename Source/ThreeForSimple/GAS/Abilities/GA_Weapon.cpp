@@ -12,8 +12,12 @@
 
 UGA_Weapon::UGA_Weapon()
 {
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+	
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
+	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
+	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
 }
 
 void UGA_Weapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -70,6 +74,13 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 	
 	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
 		OwningCharacter->ResetAnimInstanceToDefault();
+
+	CurrentAimTarget = nullptr;
+	FGameplayEventData EventData;
+	EventData.Target = CurrentAimTarget;
+	SendLocalGameplayEvent(UTfsAbilitySystemStatics::GetTargetUpdatedTag(), EventData);
+
+	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
 	
 	StopShooting(FGameplayEventData());
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
@@ -77,8 +88,22 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
+	if (bCanShoot)
+		return;
+	
 	if (!ShootMontage)
 		return;
+
+	bCanShoot = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		DelayBetweenShotsTimerHandle,
+		[this]() 
+		{
+			bCanShoot = true;
+		},
+		DelayBetweenShotsSeconds,
+		false
+	);
 	
 	//Plays only on the server
 	if (HasAuthority(&CurrentActivationInfo))
@@ -123,13 +148,12 @@ void UGA_Weapon::FindAimTarget()
 {
 	NewAimTarget = GetAimTarget(ShootRange, ETeamAttitude::Hostile);
 	
-	if (HasValidTarget())
-		return;
+	//if (HasValidTarget())
+	//	return;
 	
 	if (NewAimTarget == CurrentAimTarget)
-	{
 		return;
-	}
+	
 	CurrentAimTarget = NewAimTarget;
 	
 	if (AimTargetAbilitySystemComponent)

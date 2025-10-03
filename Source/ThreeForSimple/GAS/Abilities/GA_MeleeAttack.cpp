@@ -4,11 +4,15 @@
 #include "GA_MeleeAttack.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 #include "GameplayTagsManager.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
+
+#pragma optimize("", off)
 
 UGA_MeleeAttack::UGA_MeleeAttack()
 {
@@ -88,11 +92,15 @@ void UGA_MeleeAttack::DoDamage(FGameplayEventData Data)
 {
 	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius);
 
+	UE_LOG(LogTemp, Warning, TEXT("Damage"));
+	
 	for (const FHitResult& Result : HitResults)
 	{
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(GetDamageEffectForCurrentCombo(), GetAbilityLevel(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo()));
 
-		FGameplayEffectContextHandle EffectContextHandle = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+		FGameplayAbilitySpecHandle abilitySpecHandle = GetCurrentAbilitySpecHandle();
+		const FGameplayAbilityActorInfo* AbilityActorInfo = GetCurrentActorInfo();
+		FGameplayEffectContextHandle EffectContextHandle =  MakeEffectContext(abilitySpecHandle, AbilityActorInfo);
 		EffectContextHandle.AddHitResult(Result);
 		
 		EffectSpecHandle.Data->SetContext(EffectContextHandle);

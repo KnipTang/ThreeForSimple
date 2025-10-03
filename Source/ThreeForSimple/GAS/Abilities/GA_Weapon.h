@@ -41,6 +41,13 @@ protected:
 	const TSubclassOf<UAnimInstance> AimAnimInstance;
 	UPROPERTY(EditDefaultsOnly, Category = "Aim")
 	UAnimMontage* ShootMontage;
+
+	//Delay between shots
+	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+	float DelayBetweenShotsSeconds = 0.f;
+	bool bCanShoot = true;
+	
+	FTimerHandle DelayBetweenShotsTimerHandle;
 	/***************************************************/
 	/*			   Find if aiming at target			    /
 	/***************************************************/
