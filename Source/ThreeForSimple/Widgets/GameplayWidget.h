@@ -26,4 +26,15 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UCrosshairWidget* CrosshairWidget;
+
+	//Loot Chest
+private:
+	void ToggleLootChest();
+	void PlayLootChestPopupAnimation(bool bPlayForward);
+	
+	UPROPERTY(meta = (BindWidget))
+	class ULootChestWidget* LootChestWidget;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* LootChestPopupAnimation;
 };

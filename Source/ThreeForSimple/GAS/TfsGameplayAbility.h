@@ -24,6 +24,7 @@ protected:
 		ETeamAttitude::Type TargetTeam = ETeamAttitude::Hostile, bool bDrawDebug = false, bool bIgnoreSelf = true) const;
 
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);
+	TArray<FHitResult> GetHitscanTarget(float AimDistance, ECollisionChannel CollisionType) const;
 	AActor* GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const;
 
 	bool IsActorTeamAttitudeIs(const AActor* OtherActor, ETeamAttitude::Type TeamAttitude) const;

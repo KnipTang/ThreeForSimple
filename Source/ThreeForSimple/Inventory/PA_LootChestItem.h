@@ -4,24 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "PA_InventoryItem.generated.h"
+#include "PA_LootChestItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class THREEFORSIMPLE_API UPA_InventoryItem : public UPrimaryDataAsset
+class THREEFORSIMPLE_API UPA_LootChestItem : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
-	static FPrimaryAssetType GetInventoryItemAssetType();
+	static FPrimaryAssetType GetLootChestItemAssetType();
 	UTexture2D* GetIcon() const;
 
 	FText GetItemName() const { return ItemName; }
 	FText GetItemDescription() const { return ItemDescription; }
-	float GetPrice() const { return Price; }
 
 	bool GetIsConsumable() const { return bIsConsumable; }
 	
@@ -30,27 +29,24 @@ public:
 	TSubclassOf<class UGameplayAbility> GetGrantedAbility() const { return GrantedAbility; }
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	TSoftObjectPtr<UTexture2D> Icon;
-
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
-	float Price;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	FText ItemName;
 
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	FText ItemDescription;
 
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	bool bIsConsumable;
 
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	TSubclassOf<class UGameplayEffect> EquippedEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	TSubclassOf<class UGameplayEffect> ConsumeEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category = "InventoryItem")
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	TSubclassOf<class UGameplayAbility> GrantedAbility;
 };

@@ -24,6 +24,7 @@ public:
 	static FGameplayTag GetAimStatTag();
 	static FGameplayTag GetCrosshairStatTag();
 	static FGameplayTag GetTargetUpdatedTag();
+	static FGameplayTag GetInteractTag();
 
 	static void ApplyEffect(AActor* OwnerActor, AActor* OtherActor, const struct FGameplayEffectSpecHandle& EffectSpecHandle);
 	static void SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult, const FGameplayTag& HitGameplayCueTag);

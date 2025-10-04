@@ -80,10 +80,7 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 	EventData.Target = CurrentAimTarget;
 	SendLocalGameplayEvent(UTfsAbilitySystemStatics::GetTargetUpdatedTag(), EventData);
 
-	if (UWorld* World = GetWorld())
-		World->GetTimerManager().ClearTimer(DelayBetweenShotsTimerHandle);
-
-	//bCanShoot = true;
+	ResetCanShoot();
 	
 	StopShooting(FGameplayEventData());
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
@@ -91,6 +88,9 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
+	if (!bCanShoot)
+		return;
+
 	//Plays only on the server
 	if (HasAuthority(&CurrentActivationInfo))
 	{
@@ -137,6 +137,8 @@ FGameplayTag UGA_Weapon::GetWeaponTag()
 
 void UGA_Weapon::ResetCanShoot()
 {
+	if (UWorld* World = GetWorld())
+		World->GetTimerManager().ClearTimer(DelayBetweenShotsTimerHandle);
 	bCanShoot = true;
 	StartShooting(FGameplayEventData());
 }

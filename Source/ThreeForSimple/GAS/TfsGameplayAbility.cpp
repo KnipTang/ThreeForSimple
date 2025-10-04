@@ -81,8 +81,9 @@ void UTfsGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)
 	}
 }
 
-AActor* UTfsGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
+TArray<FHitResult> UTfsGameplayAbility::GetHitscanTarget(float AimDistance, ECollisionChannel CollisionType) const
 {
+	TArray<FHitResult> HitResults;
 	if (AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo())
 	{
 		FVector Location;
@@ -92,7 +93,7 @@ AActor* UTfsGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type
 		FVector AimEnd = Location + Rotation.Vector() * AimDistance;
 
 		FCollisionObjectQueryParams CollisionObjectQueryParams;
-		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+		CollisionObjectQueryParams.AddObjectTypesToQuery(CollisionType);
 		
 		FCollisionQueryParams CollisionQueryParams;
 		CollisionQueryParams.AddIgnoredActor(OwnerAvatarActor);
@@ -102,14 +103,18 @@ AActor* UTfsGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type
 			DrawDebugLine(GetWorld(), Location, AimEnd, FColor::Red, false, 2.f, 0U, 3.f);
 		}
 		
-		TArray<FHitResult> HitResults;
-		if (GetWorld()->LineTraceMultiByObjectType(HitResults, Location, AimEnd, CollisionObjectQueryParams, CollisionQueryParams))
-		{
-			for (FHitResult HitResult : HitResults)
-				if (IsActorTeamAttitudeIs(HitResult.GetActor(), TeamAttitude))
-					return HitResult.GetActor();
-		}
+		GetWorld()->LineTraceMultiByObjectType(HitResults, Location, AimEnd, CollisionObjectQueryParams, CollisionQueryParams);
 	}
+
+	return HitResults;
+}
+
+AActor* UTfsGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
+{
+
+	for (FHitResult HitResult : GetHitscanTarget(AimDistance, ECC_Pawn))
+		if (IsActorTeamAttitudeIs(HitResult.GetActor(), TeamAttitude))
+			return HitResult.GetActor();
 
 	return nullptr;
 }

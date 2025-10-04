@@ -43,6 +43,11 @@ FGameplayTag UTfsAbilitySystemStatics::GetTargetUpdatedTag()
 	return FGameplayTag::RequestGameplayTag("Target.Updated");
 }
 
+FGameplayTag UTfsAbilitySystemStatics::GetInteractTag()
+{
+	return FGameplayTag::RequestGameplayTag("Interact");
+}
+
 void UTfsAbilitySystemStatics::ApplyEffect(AActor* OwnerActor, AActor* OtherActor, const FGameplayEffectSpecHandle& EffectSpecHandle)
 {
 	UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor);
