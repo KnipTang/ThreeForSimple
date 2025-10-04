@@ -80,7 +80,10 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 	EventData.Target = CurrentAimTarget;
 	SendLocalGameplayEvent(UTfsAbilitySystemStatics::GetTargetUpdatedTag(), EventData);
 
-	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
+	if (UWorld* World = GetWorld())
+		World->GetTimerManager().ClearTimer(DelayBetweenShotsTimerHandle);
+
+	//bCanShoot = true;
 	
 	StopShooting(FGameplayEventData());
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
@@ -88,23 +91,6 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
-	if (bCanShoot)
-		return;
-	
-	if (!ShootMontage)
-		return;
-
-	bCanShoot = false;
-	GetWorld()->GetTimerManager().SetTimer(
-		DelayBetweenShotsTimerHandle,
-		[this]() 
-		{
-			bCanShoot = true;
-		},
-		DelayBetweenShotsSeconds,
-		false
-	);
-	
 	//Plays only on the server
 	if (HasAuthority(&CurrentActivationInfo))
 	{
@@ -128,11 +114,31 @@ void UGA_Weapon::StopShooting(FGameplayEventData PayLoad)
 
 void UGA_Weapon::Shoot(FGameplayEventData PayLoad)
 {
+	if (!bCanShoot)
+		return;
+
+	bCanShoot = false;
+	StopShooting(FGameplayEventData());
+	
+	if (UWorld* World = GetWorld())
+		World->GetTimerManager().SetTimer(
+		DelayBetweenShotsTimerHandle,
+		this,
+		&UGA_Weapon::ResetCanShoot,
+		DelayBetweenShotsSeconds,
+		false
+	);
 }
 
 FGameplayTag UGA_Weapon::GetWeaponTag()
 {
 	return FGameplayTag::RequestGameplayTag("Ability.Weapon");
+}
+
+void UGA_Weapon::ResetCanShoot()
+{
+	bCanShoot = true;
+	StartShooting(FGameplayEventData());
 }
 
 AActor* UGA_Weapon::GetAimTargetIfValid() const

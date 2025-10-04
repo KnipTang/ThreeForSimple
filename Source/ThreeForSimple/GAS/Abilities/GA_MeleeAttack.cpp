@@ -12,8 +12,6 @@
 #include "GameplayTagsManager.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 
-#pragma optimize("", off)
-
 UGA_MeleeAttack::UGA_MeleeAttack()
 {
 	AbilityTags.AddTag(UTfsAbilitySystemStatics::GetMeleeAttackAbilityTag());

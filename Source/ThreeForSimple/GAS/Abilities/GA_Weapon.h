@@ -43,6 +43,8 @@ protected:
 	UAnimMontage* ShootMontage;
 
 	//Delay between shots
+	void ResetCanShoot();
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	float DelayBetweenShotsSeconds = 0.f;
 	bool bCanShoot = true;

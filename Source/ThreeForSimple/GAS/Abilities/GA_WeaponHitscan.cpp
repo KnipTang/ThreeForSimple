@@ -10,6 +10,9 @@
 
 void UGA_WeaponHitscan::Shoot(FGameplayEventData PayLoad)
 {
+	if (!bCanShoot)
+		return;
+	
 	Super::Shoot(PayLoad);
 
 	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
