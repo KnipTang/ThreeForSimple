@@ -2,6 +2,8 @@
 
 
 #include "ItemWidget.h"
+
+#include "ItemToolTip.h"
 #include "Components/Image.h"
 
 void UItemWidget::NativeConstruct()
@@ -15,6 +17,26 @@ void UItemWidget::NativeConstruct()
 void UItemWidget::SetIcon(UTexture2D* IconTexture)
 {
 	ItemIcon->SetBrushFromTexture(IconTexture);
+}
+
+UItemToolTip* UItemWidget::SetItemToolTipWidget(const class UPA_LootChestItem* Item)
+{
+	if (!Item)
+		return nullptr;
+
+	if (GetOwningPlayer() && ItemToolTipWidgetClass)
+	{
+		UItemToolTip* ToolTip = CreateWidget<UItemToolTip>(GetOwningPlayer(), ItemToolTipWidgetClass);
+		if (ToolTip)
+		{
+			ToolTip->SetItem(Item);
+			SetToolTip(ToolTip);
+		}
+
+		return ToolTip;
+	}
+
+	return nullptr;
 }
 
 FReply UItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

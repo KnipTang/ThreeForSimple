@@ -20,6 +20,8 @@ public:
 	virtual void OnPossess(APawn* NewPawn) override;
 	// only called on the CLIENT (Design of unreal), also on the listening server (P2P server setup)
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
+
+	void ToggleLootChestWidget();
 private:
 	void SpawnGameplayWidget();
 	

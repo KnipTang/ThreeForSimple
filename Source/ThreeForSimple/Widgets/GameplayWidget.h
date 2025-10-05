@@ -16,7 +16,6 @@ class THREEFORSIMPLE_API UGameplayWidget : public UUserWidget
 	
 public:
 	virtual void NativeConstruct() override;
-	
 private:
 	void ConfigureWithASC(class UAbilitySystemComponent* ASC);
 
@@ -28,9 +27,14 @@ private:
 	class UCrosshairWidget* CrosshairWidget;
 
 	//Loot Chest
+public:
+	void ToggleLootChest(const struct FGameplayEventData* EventData);
 private:
-	void ToggleLootChest();
 	void PlayLootChestPopupAnimation(bool bPlayForward);
+	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
+	void SetShowMouseCursor(bool bShowMouseCursor);
+	void SetFocusToGameAndUI();
+	void SetFocusToGameOnly();
 	
 	UPROPERTY(meta = (BindWidget))
 	class ULootChestWidget* LootChestWidget;

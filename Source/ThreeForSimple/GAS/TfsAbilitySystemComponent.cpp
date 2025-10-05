@@ -4,9 +4,28 @@
 #include "TfsAbilitySystemComponent.h"
 #include "TfsAttributeSet.h"
 
+#pragma optimize("", off)
+
 UTfsAbilitySystemComponent::UTfsAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(UTfsAttributeSet::GetHealthAttribute()).AddUObject(this, &UTfsAbilitySystemComponent::HealthUpdated);
+}
+
+void UTfsAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)
+{
+	Super::InitAbilityActorInfo(InOwnerActor, InAvatarActor);
+	
+	TryActivateAbilitiesOnSpawn();
+}
+
+void UTfsAbilitySystemComponent::TryActivateAbilitiesOnSpawn()
+{
+	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : OnSpawnBasicAbilities)
+	{
+		const FGameplayAbilitySpecHandle AbilityHandle = GiveAbility(FGameplayAbilitySpec(AbilityPar.Value, 0, static_cast<int32>(AbilityPar.Key), nullptr));
+		if (AbilityHandle.IsValid())
+			TryActivateAbility(AbilityHandle);
+	}
 }
 
 void UTfsAbilitySystemComponent::AuthApplyGameplayEffect(const TSubclassOf<UGameplayEffect>& GameplayEffect, int Level)
@@ -36,11 +55,11 @@ void UTfsAbilitySystemComponent::GiveInitialAbilities()
 	if(!GetOwner() || !GetOwner()->HasAuthority())
 		return;
 	
-	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : AddedAbilities)
+	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : InputBasicAbilities)
 	{
 		GiveAbility(FGameplayAbilitySpec(AbilityPar.Value, 0, static_cast<int32>(AbilityPar.Key), nullptr));
 	}
-	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : BasicAbilities)
+	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPar : AddedAbilities)
 	{
 		GiveAbility(FGameplayAbilitySpec(AbilityPar.Value, 1, static_cast<int32>(AbilityPar.Key), nullptr));
 	}

@@ -10,7 +10,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AbilitySystemComponent.h"
+#include "TfsPlayerController.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
+#include "ThreeForSimple/Inventory/InventoryComponent.h"
 
 ATfsPlayerCharacter::ATfsPlayerCharacter()
 {
@@ -24,6 +26,8 @@ ATfsPlayerCharacter::ATfsPlayerCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator( 0.0f,720.0f,0.0f );
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("Inventory Component");
 }
 
 void ATfsPlayerCharacter::PawnClientRestart()
@@ -49,6 +53,7 @@ void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 		EnhancedInputComp->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleMoveInput);
 		EnhancedInputComp->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLookInput);
 		EnhancedInputComp->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::Jump);
+		EnhancedInputComp->BindAction(LootChestInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLootChestInput);
 
 		for (const TPair<ECAbilityInputID, class UInputAction*>& GameplayAbilityInputAction : GameplayAbilitiesInputAction)
 			EnhancedInputComp->BindAction(GameplayAbilityInputAction.Value, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleAbilityInput, GameplayAbilityInputAction.Key);
@@ -77,6 +82,13 @@ void ATfsPlayerCharacter::HandleLookInput(const struct FInputActionValue& InputA
 
 	AddControllerPitchInput(-InputVal.Y);
 	AddControllerYawInput(InputVal.X);
+}
+
+void ATfsPlayerCharacter::HandleLootChestInput(const struct FInputActionValue& InputActionValue)
+{
+	if (APlayerController* PlayerController = GetController<APlayerController>())
+		if (ATfsPlayerController* TfsPlayerController = Cast<ATfsPlayerController>(PlayerController))
+			TfsPlayerController->ToggleLootChestWidget();
 }
 
 void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID)

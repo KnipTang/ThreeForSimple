@@ -7,6 +7,7 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "LootChestItemWidget.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemTaken, const class UPA_LootChestItem*)
 /**
  * 
  */
@@ -16,10 +17,14 @@ class THREEFORSIMPLE_API ULootChestItemWidget : public UItemWidget, public IUser
 {
 	GENERATED_BODY()
 public:
+	FOnItemTaken OnItemTaken;
+	
 	//Called when this widget is getting stored in a tileview
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	const class UPA_LootChestItem* GetLootChestItem() const { return LootChestItem; }
 private:
 	UPROPERTY()
 	const class UPA_LootChestItem* LootChestItem;
+
+	virtual void LeftMouseButtonClicked() override;
 };

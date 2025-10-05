@@ -4,6 +4,7 @@
 #include "TfsPlayerController.h"
 
 #include "TfsPlayerCharacter.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "ThreeForSimple/Widgets/GameplayWidget.h"
@@ -29,6 +30,15 @@ void ATfsPlayerController::AcknowledgePossession(APawn* NewPawn)
 	{
 		TfsPlayerCharacter->ClientSideInit();
 		SpawnGameplayWidget();
+	}
+}
+
+void ATfsPlayerController::ToggleLootChestWidget()
+{
+	if (GameplayWidget)
+	{
+		const FGameplayEventData EmptyGameplayEventData = FGameplayEventData();
+		GameplayWidget->ToggleLootChest(&EmptyGameplayEventData);
 	}
 }
 

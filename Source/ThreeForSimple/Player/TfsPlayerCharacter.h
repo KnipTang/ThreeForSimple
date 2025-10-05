@@ -40,6 +40,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* JumpInputAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* LootChestInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TMap<ECAbilityInputID, class UInputAction*> GameplayAbilitiesInputAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -47,6 +49,7 @@ private:
 
 	void HandleMoveInput(const struct FInputActionValue& InputActionValue);
 	void HandleLookInput(const struct FInputActionValue& InputActionValue);
+	void HandleLootChestInput(const struct FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID);
 
 	/***************************************************/
@@ -74,4 +77,11 @@ private:
 	/*					  Weapon						/
 	/***************************************************/
 	virtual void OnAimStateChanged(const bool bIsAiming) override;
+
+	/***************************************************/
+	/*					Camera View						/
+	/***************************************************/
+private:
+	UPROPERTY()
+	class UInventoryComponent* InventoryComponent;
 };

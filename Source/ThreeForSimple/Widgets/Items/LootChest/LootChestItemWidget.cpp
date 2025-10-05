@@ -13,4 +13,11 @@ void ULootChestItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 		return;
 
 	SetIcon(LootChestItem->GetIcon());
+	SetItemToolTipWidget(LootChestItem);
 }
+
+void ULootChestItemWidget::LeftMouseButtonClicked()
+{
+	OnItemTaken.Broadcast(GetLootChestItem());
+}
+

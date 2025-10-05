@@ -81,7 +81,7 @@ void UTfsGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)
 	}
 }
 
-TArray<FHitResult> UTfsGameplayAbility::GetHitscanTarget(float AimDistance, ECollisionChannel CollisionType) const
+TArray<FHitResult> UTfsGameplayAbility::GetHitscanTargets(float AimDistance, ECollisionChannel CollisionType) const
 {
 	TArray<FHitResult> HitResults;
 	if (AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo())
@@ -112,7 +112,7 @@ TArray<FHitResult> UTfsGameplayAbility::GetHitscanTarget(float AimDistance, ECol
 AActor* UTfsGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
 {
 
-	for (FHitResult HitResult : GetHitscanTarget(AimDistance, ECC_Pawn))
+	for (FHitResult HitResult : GetHitscanTargets(AimDistance, ECC_Pawn))
 		if (IsActorTeamAttitudeIs(HitResult.GetActor(), TeamAttitude))
 			return HitResult.GetActor();
 

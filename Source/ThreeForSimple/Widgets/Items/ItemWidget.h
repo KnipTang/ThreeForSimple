@@ -17,13 +17,19 @@ class THREEFORSIMPLE_API UItemWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	virtual void SetIcon(UTexture2D* IconTexture);
+
+protected:
+	class UItemToolTip* SetItemToolTipWidget(const class UPA_LootChestItem* Item);
 private:
 	UPROPERTY(meta=(bindWidget))
 	class UImage* ItemIcon;
 
+	UPROPERTY(EditDefaultsOnly, Category = "ToolTip")
+	TSubclassOf<class UItemToolTip> ItemToolTipWidgetClass;
+
 	virtual FReply NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
 	virtual FReply NativeOnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
 
-	virtual void RightMouseButtonClicked() {UE_LOG(LogTemp, Warning, TEXT("RightMouseButtonClicked"));};
-	virtual void LeftMouseButtonClicked() {UE_LOG(LogTemp, Warning, TEXT("LeftMouseButtonClicked"));};;
+	virtual void RightMouseButtonClicked() {UE_LOG(LogTemp, Warning, TEXT("RightMouseButtonClicked"));}
+	virtual void LeftMouseButtonClicked() {UE_LOG(LogTemp, Warning, TEXT("LeftMouseButtonClicked"));}
 };

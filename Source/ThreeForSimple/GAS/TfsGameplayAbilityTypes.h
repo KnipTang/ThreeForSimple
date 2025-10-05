@@ -11,6 +11,7 @@ enum class ECAbilityInputID : uint8
 	None							UMETA(DisplayName = "None"),
 	BasicAttack						UMETA(DisplayName = "Melee Attack"),
 	Aim								UMETA(DisplayName = "Aim"),
+	Interact						UMETA(DisplayName = "Interact"),
 	Confirm							UMETA(DisplayName = "Confirm"),
 	Cancel							UMETA(DisplayName = "Cancel"),
 };

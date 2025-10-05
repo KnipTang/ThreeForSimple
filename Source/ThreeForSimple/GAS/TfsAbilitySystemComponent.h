@@ -17,6 +17,10 @@ class THREEFORSIMPLE_API UTfsAbilitySystemComponent : public UAbilitySystemCompo
 
 public:
 	UTfsAbilitySystemComponent();
+
+	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
+	//Lyra starter game inspired
+	void TryActivateAbilitiesOnSpawn();
 	
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
@@ -37,7 +41,10 @@ private:
 
 	//Abilities that you already have from the beginning of the game
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
-	TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BasicAbilities;
+	TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> OnSpawnBasicAbilities;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
+	TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> InputBasicAbilities;
 	
 	//Abilities you learn during game
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")

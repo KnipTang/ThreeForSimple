@@ -43,9 +43,9 @@ FGameplayTag UTfsAbilitySystemStatics::GetTargetUpdatedTag()
 	return FGameplayTag::RequestGameplayTag("Target.Updated");
 }
 
-FGameplayTag UTfsAbilitySystemStatics::GetInteractTag()
+FGameplayTag UTfsAbilitySystemStatics::GetInteractActivateTag()
 {
-	return FGameplayTag::RequestGameplayTag("Interact");
+	return FGameplayTag::RequestGameplayTag("Interact.Activate");
 }
 
 void UTfsAbilitySystemStatics::ApplyEffect(AActor* OwnerActor, AActor* OtherActor, const FGameplayEffectSpecHandle& EffectSpecHandle)
