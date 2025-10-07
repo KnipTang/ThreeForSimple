@@ -3,6 +3,7 @@
 
 #include "InventoryComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "PA_LootChestItem.h"
 
 // Sets default values for this component's properties
@@ -46,7 +47,7 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	OwnerAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 	
 }
 

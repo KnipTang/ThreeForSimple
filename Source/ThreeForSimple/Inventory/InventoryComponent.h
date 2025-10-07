@@ -26,6 +26,8 @@ public:
 	void TryAddToInventory(const class UPA_LootChestItem* ItemToAdd);
 
 	FORCEINLINE int GetInventoryCapacity() const { return InventoryCapacity; }
+
+	FORCEINLINE class UAbilitySystemComponent* GetOwnerAbilitySystemComponent() const { return OwnerAbilitySystemComponent; }
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -33,6 +35,9 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int InventoryCapacity = 6;
+
+	UPROPERTY()
+	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	
 	UPROPERTY()
 	TMap<struct FInventoryItemHandle, class UInventoryItem*> InventoryMap;

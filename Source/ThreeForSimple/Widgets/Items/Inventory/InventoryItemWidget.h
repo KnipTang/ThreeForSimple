@@ -21,6 +21,8 @@ public:
 	void EmptySlot();
 	void SetSlotNumber(int NewSlotNumber);
 	FORCEINLINE int GetSlotNumber() const { return SlotNumber; }
+
+	FORCEINLINE const UInventoryItem* GetInventoryItem() const {return InventoryItem;}
 	
 	void SetSelected(bool bSelectItem = true);
 	FORCEINLINE bool IsItemSelected() const { return bSelected; }

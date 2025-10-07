@@ -68,6 +68,26 @@ void UTfsAbilitySystemComponent::ApplyFullStatEffect()
 	AuthApplyGameplayEffect(FullStatEffect);
 }
 
+void UTfsAbilitySystemComponent::AddInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility)
+{
+	RemoveInputAbility(InputID, GameplayAbility);
+	GiveAbility(FGameplayAbilitySpec(GameplayAbility, 0, static_cast<int32>(InputID), nullptr));
+	InputBasicAbilities.Add(InputID, GameplayAbility);
+}
+
+void UTfsAbilitySystemComponent::RemoveInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility)
+{
+	if (InputBasicAbilities.Find(InputID))
+		InputBasicAbilities.Remove(InputID);
+	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (Spec.InputID == static_cast<int32>(InputID))
+		{
+			ClearAbility(Spec.Handle);
+		}
+	}
+}
+
 void UTfsAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)
 {
 	if (!GetOwner())

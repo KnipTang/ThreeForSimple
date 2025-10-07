@@ -6,9 +6,18 @@
 #include "Engine/DataAsset.h"
 #include "PA_LootChestItem.generated.h"
 
+enum class ECAbilityInputID : uint8;
 /**
  * 
  */
+UENUM()
+enum class EItemType
+{
+	Melee,
+	Weapon
+		
+};
+
 UCLASS()
 class THREEFORSIMPLE_API UPA_LootChestItem : public UPrimaryDataAsset
 {
@@ -19,6 +28,8 @@ public:
 	static FPrimaryAssetType GetLootChestItemAssetType();
 	UTexture2D* GetIcon() const;
 
+	EItemType GetItemType() const { return ItemType; }
+	
 	FText GetItemName() const { return ItemName; }
 	FText GetItemDescription() const { return ItemDescription; }
 
@@ -26,11 +37,15 @@ public:
 	
 	TSubclassOf<class UGameplayEffect> GetEquippedEffect() const { return EquippedEffect; }
 	TSubclassOf<class UGameplayEffect> GetConsumeEffect() const { return ConsumeEffect; }
-	TSubclassOf<class UGameplayAbility> GetGrantedAbility() const { return GrantedAbility; }
-	
+	TSubclassOf<class UGameplayAbility> GetGrantedNormalAbility() const { return GrantedNormalAbility; }
+	TSubclassOf<class UGameplayAbility> GetGrantedInputAbility(const ECAbilityInputID InputID) const;
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	TSoftObjectPtr<UTexture2D> Icon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
+	EItemType ItemType;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
 	FText ItemName;
@@ -48,5 +63,8 @@ private:
 	TSubclassOf<class UGameplayEffect> ConsumeEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
-	TSubclassOf<class UGameplayAbility> GrantedAbility;
+	TSubclassOf<class UGameplayAbility> GrantedNormalAbility;
+
+	UPROPERTY(EditDefaultsOnly, Category = "LootChestItem")
+	TMap<ECAbilityInputID, TSubclassOf<class UGameplayAbility>> GrantedInputAbility;
 };

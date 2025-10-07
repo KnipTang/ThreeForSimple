@@ -26,6 +26,9 @@ public:
 	void GiveInitialAbilities();
 
 	void ApplyFullStatEffect();
+
+	void AddInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility);
+	void RemoveInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility);
 private:
 	void AuthApplyGameplayEffect(const TSubclassOf<UGameplayEffect>& GameplayEffect, int Level = 1);
 

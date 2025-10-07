@@ -47,16 +47,10 @@ public:
 	FInventoryItemHandle GetHandle() const { return Handle; };
 
 	bool IsValid() const;
-
-	FORCEINLINE void SetSelected(bool bSelectItem = true) {bSelected = bSelectItem; }
-
-	FORCEINLINE bool IsItemSelected() const { return bSelected; }
 private:
 	UPROPERTY()
 	const class UPA_LootChestItem* LootChestItem;
 	FInventoryItemHandle Handle;
 
 	int SlotNumber;
-	
-	bool bSelected;
 };

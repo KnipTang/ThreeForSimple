@@ -3,6 +3,8 @@
 
 #include "InventoryItem.h"
 
+#include "PA_LootChestItem.h"
+
 FInventoryItemHandle::FInventoryItemHandle() :
 	HandleID{GetInvalidID()}
 {
