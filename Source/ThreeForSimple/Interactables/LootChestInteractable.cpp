@@ -2,28 +2,42 @@
 
 
 #include "LootChestInteractable.h"
-
-#include "AbilitySystemComponent.h"
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
-#include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
+#include "ThreeForSimple/Inventory/InventoryComponent.h"
 #include "ThreeForSimple/Player/TfsPlayerController.h"
-#include "ThreeForSimple/Widgets/Items/LootChest/LootChestWidget.h"
+#include "ThreeForSimple/Widgets/Items/Inventory/InventoryWidget.h"
+
+ALootChestInteractable::ALootChestInteractable()
+{
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("Inventory Component");
+}
 
 void ALootChestInteractable::BeginPlay()
 {
 	Super::BeginPlay();
-
-	LootChestWidget = CreateWidget<ULootChestWidget>(GetWorld());
 }
 
 void ALootChestInteractable::OnInteract(AActor* InteractActor)
 {
 	Super::OnInteract(InteractActor);
 
-	//if (ACharacter* Character = Cast<ACharacter>(InteractActor))
-	//	if (APlayerController* PlayerController = Character->GetController<APlayerController>())
-	//		if (ATfsPlayerController* TfsPlayerController = Cast<ATfsPlayerController>(PlayerController))
-	//			TfsPlayerController->SetLootChestWidget(LootChestWidget);
+	if (ACharacter* Character = Cast<ACharacter>(InteractActor))
+		if (APlayerController* PlayerController = Character->GetController<APlayerController>())
+			if (ATfsPlayerController* TfsPlayerController = Cast<ATfsPlayerController>(PlayerController))
+			{
+				if (LootChestWidgetClass)
+				{
+					LootChestWidget = CreateWidget<UInventoryWidget>(TfsPlayerController, LootChestWidgetClass);
+				}
+	
+				if (InventoryComponent && LootChestWidget)
+				{
+					LootChestWidget->InventoryComponent = InventoryComponent;
+					for (const UPA_LootChestItem* LootChestItem : LootChestItems)
+						InventoryComponent->TryAddToInventory(LootChestItem);
+				}
+				
+				TfsPlayerController->SetLootChestWidget(LootChestWidget);
+			}
 }

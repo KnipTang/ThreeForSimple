@@ -21,7 +21,12 @@ public:
 	// only called on the CLIENT (Design of unreal), also on the listening server (P2P server setup)
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
 
+	void ToggleGodModeWidget();
+	
 	void ToggleLootChestWidget();
+	void SetLootChestWidget(class UInventoryWidget* NewLootChestWidget);
+
+	void ChangeSelectedInventoryItem(float ChangeDirection);
 private:
 	void SpawnGameplayWidget();
 	

@@ -17,6 +17,7 @@ UGA_Weapon::UGA_Weapon()
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
 	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
+	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetMeleeAttackAbilityTag());
 	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
 }
 
@@ -88,7 +89,7 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
-	if (!bCanShoot)
+	if (!bCanShoot && DelayBetweenShotsSeconds != 0)
 		return;
 
 	//Plays only on the server
@@ -114,6 +115,9 @@ void UGA_Weapon::StopShooting(FGameplayEventData PayLoad)
 
 void UGA_Weapon::Shoot(FGameplayEventData PayLoad)
 {
+	if (DelayBetweenShotsSeconds == 0)
+		return;
+	
 	if (!bCanShoot)
 		return;
 

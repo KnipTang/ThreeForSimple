@@ -42,6 +42,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* LootChestInputAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* SelectedInventorySlotInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TMap<ECAbilityInputID, class UInputAction*> GameplayAbilitiesInputAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -49,7 +51,8 @@ private:
 
 	void HandleMoveInput(const struct FInputActionValue& InputActionValue);
 	void HandleLookInput(const struct FInputActionValue& InputActionValue);
-	void HandleLootChestInput(const struct FInputActionValue& InputActionValue);
+	void HandleDebugGodModeInput(const struct FInputActionValue& InputActionValue);
+	void HandleSelectedInventorySlotChanged(const struct FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID);
 
 	/***************************************************/
@@ -79,9 +82,12 @@ private:
 	virtual void OnAimStateChanged(const bool bIsAiming) override;
 
 	/***************************************************/
-	/*					Camera View						/
+	/*					  Inventory						/
 	/***************************************************/
 private:
 	UPROPERTY()
 	class UInventoryComponent* InventoryComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Items")
+	TArray<class UPA_LootChestItem*> BasicItems;
 };

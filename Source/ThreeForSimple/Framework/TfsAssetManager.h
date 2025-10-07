@@ -17,7 +17,11 @@ class THREEFORSIMPLE_API UTfsAssetManager : public UAssetManager
 public:
 	static UTfsAssetManager& Get();
 	void LoadChestItems(const FStreamableDelegate& LoadFinishCallBack);
-	bool GetLoadedLootChestItems(TArray<const class UPA_LootChestItem*>& OutItems) const;
+	bool GetLoadedLootChestItems(TArray<const class UPA_LootChestItem*>& OutItems);
 private:
 	void LootChestItemsFinishedLoading(FStreamableDelegate CallBack);
+
+	UPROPERTY()
+	TArray<const class UPA_LootChestItem*> AllLoadedItems;
+	bool bAllLootChestItemsFinishedLoading;
 };

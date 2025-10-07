@@ -2,7 +2,6 @@
 
 
 #include "TfsAssetManager.h"
-
 #include "ThreeForSimple/Inventory/PA_LootChestItem.h"
 
 UTfsAssetManager& UTfsAssetManager::Get()
@@ -19,17 +18,24 @@ void UTfsAssetManager::LoadChestItems(const FStreamableDelegate& LoadFinishCallB
 	LoadPrimaryAssetsWithType(UPA_LootChestItem::GetLootChestItemAssetType(), TArray<FName>(), FStreamableDelegate::CreateUObject(this, &UTfsAssetManager::LootChestItemsFinishedLoading, LoadFinishCallBack));
 }
 
-bool UTfsAssetManager::GetLoadedLootChestItems(TArray<const class UPA_LootChestItem*>& OutItems) const
+bool UTfsAssetManager::GetLoadedLootChestItems(TArray<const class UPA_LootChestItem*>& OutItems)
 {
+	if (bAllLootChestItemsFinishedLoading)
+	{
+		OutItems = AllLoadedItems;
+		return bAllLootChestItemsFinishedLoading;
+	}
+	
 	TArray<UObject*> LoadedObjects;
-	bool bLoaded = GetPrimaryAssetObjectList(UPA_LootChestItem::GetLootChestItemAssetType(), LoadedObjects);
+	bAllLootChestItemsFinishedLoading = GetPrimaryAssetObjectList(UPA_LootChestItem::GetLootChestItemAssetType(), LoadedObjects);
 
-	if (bLoaded)
+	if (bAllLootChestItemsFinishedLoading)
 	{
 		for (UObject* LoadedObject : LoadedObjects)
-			OutItems.Add(Cast<UPA_LootChestItem>(LoadedObject));
+			AllLoadedItems.Add(Cast<UPA_LootChestItem>(LoadedObject));
 	}
-		return bLoaded;
+	OutItems = AllLoadedItems;
+	return bAllLootChestItemsFinishedLoading;
 }
 
 void UTfsAssetManager::LootChestItemsFinishedLoading(FStreamableDelegate CallBack)

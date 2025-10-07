@@ -4,8 +4,6 @@
 #include "TfsAbilitySystemComponent.h"
 #include "TfsAttributeSet.h"
 
-#pragma optimize("", off)
-
 UTfsAbilitySystemComponent::UTfsAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(UTfsAttributeSet::GetHealthAttribute()).AddUObject(this, &UTfsAbilitySystemComponent::HealthUpdated);

@@ -56,3 +56,13 @@ void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_L
 	Handle = NewHandle;
 	LootChestItem = NewLootChestItem;
 }
+
+void UInventoryItem::SetSlotNumber(int NewSlotNumber)
+{
+	SlotNumber = NewSlotNumber;
+}
+
+bool UInventoryItem::IsValid() const
+{
+	return LootChestItem != nullptr;
+}

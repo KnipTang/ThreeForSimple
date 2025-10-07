@@ -15,6 +15,7 @@ class THREEFORSIMPLE_API ALootChestInteractable : public ATfsInteractable
 	GENERATED_BODY()
 
 public:
+	ALootChestInteractable();
 	virtual void BeginPlay() override;
 
 	virtual void OnInteract(AActor* InteractActor) override;
@@ -22,6 +23,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Items")
 	TArray<class UPA_LootChestItem*> LootChestItems;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widget")
+	TSubclassOf<class UInventoryWidget> LootChestWidgetClass;
 	UPROPERTY()
-	class ULootChestWidget* LootChestWidget;
+	class UInventoryWidget* LootChestWidget;
+
+	UPROPERTY()
+	class UInventoryComponent* InventoryComponent;
 };

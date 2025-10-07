@@ -42,6 +42,9 @@ void ATfsPlayerCharacter::PawnClientRestart()
 			InputSubsystem->AddMappingContext(GameplayInputMappingContext, 0);
 		}
 	}
+
+	for (const UPA_LootChestItem* Item : BasicItems)
+		InventoryComponent->TryAddToInventory(Item);
 }
 
 void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -53,7 +56,8 @@ void ATfsPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 		EnhancedInputComp->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleMoveInput);
 		EnhancedInputComp->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLookInput);
 		EnhancedInputComp->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::Jump);
-		EnhancedInputComp->BindAction(LootChestInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleLootChestInput);
+		EnhancedInputComp->BindAction(LootChestInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleDebugGodModeInput);
+		EnhancedInputComp->BindAction(SelectedInventorySlotInputAction, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleSelectedInventorySlotChanged);
 
 		for (const TPair<ECAbilityInputID, class UInputAction*>& GameplayAbilityInputAction : GameplayAbilitiesInputAction)
 			EnhancedInputComp->BindAction(GameplayAbilityInputAction.Value, ETriggerEvent::Triggered, this, &ATfsPlayerCharacter::HandleAbilityInput, GameplayAbilityInputAction.Key);
@@ -84,11 +88,20 @@ void ATfsPlayerCharacter::HandleLookInput(const struct FInputActionValue& InputA
 	AddControllerYawInput(InputVal.X);
 }
 
-void ATfsPlayerCharacter::HandleLootChestInput(const struct FInputActionValue& InputActionValue)
+void ATfsPlayerCharacter::HandleDebugGodModeInput(const struct FInputActionValue& InputActionValue)
 {
 	if (APlayerController* PlayerController = GetController<APlayerController>())
 		if (ATfsPlayerController* TfsPlayerController = Cast<ATfsPlayerController>(PlayerController))
-			TfsPlayerController->ToggleLootChestWidget();
+			TfsPlayerController->ToggleGodModeWidget();
+}
+
+void ATfsPlayerCharacter::HandleSelectedInventorySlotChanged(const struct FInputActionValue& InputActionValue)
+{
+	float ChangeValue = InputActionValue.Get<float>();
+	
+	if (APlayerController* PlayerController = GetController<APlayerController>())
+		if (ATfsPlayerController* TfsPlayerController = Cast<ATfsPlayerController>(PlayerController))
+			TfsPlayerController->ChangeSelectedInventoryItem(ChangeValue);
 }
 
 void ATfsPlayerCharacter::HandleAbilityInput(const struct FInputActionValue& InputActionValue, const ECAbilityInputID AbilityInputID)

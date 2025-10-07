@@ -16,17 +16,29 @@ class THREEFORSIMPLE_API ULootChestWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	void SetLootChestItems(class TArray<class UPA_LootChestItem*> Items);
+	void SetLootChestItems(const TArray<class UPA_LootChestItem*>& AllItems);
 private:
 	void LoadLootChestItems();
 	void LootChestItemLoadFinished();
 	void LootChestItemWidgetGenerated(UUserWidget& NewWidget);
+
+	void PopulateItemMap();
+
+	void RemoveItemFromLootChest(const class UPA_LootChestItem* ItemToRemove);
+
+	int Capacity = 20;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTileView* LootChestItemList;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Items")
-	class TArray<UPA_LootChestItem*> LootChestItems;
+	TArray<class UPA_LootChestItem*> LootChestItems;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<class ULootChestItemWidget> ItemWidgetClass;
+	
+	UPROPERTY()
+	TArray<class ULootChestItemWidget*> ItemWidgets;
 	
 	UPROPERTY()
 	TMap<const class UPA_LootChestItem*, const class ULootChestWidget*> ItemsMap;

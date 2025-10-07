@@ -33,6 +33,15 @@ void ATfsPlayerController::AcknowledgePossession(APawn* NewPawn)
 	}
 }
 
+void ATfsPlayerController::ToggleGodModeWidget()
+{
+	if (GameplayWidget)
+	{
+		const FGameplayEventData EmptyGameplayEventData = FGameplayEventData();
+		GameplayWidget->ToggleDebugGodModeWidget(&EmptyGameplayEventData);
+	}
+}
+
 void ATfsPlayerController::ToggleLootChestWidget()
 {
 	if (GameplayWidget)
@@ -40,6 +49,16 @@ void ATfsPlayerController::ToggleLootChestWidget()
 		const FGameplayEventData EmptyGameplayEventData = FGameplayEventData();
 		GameplayWidget->ToggleLootChest(&EmptyGameplayEventData);
 	}
+}
+
+void ATfsPlayerController::SetLootChestWidget(class UInventoryWidget* NewLootChestWidget)
+{
+	GameplayWidget->SetLootChest(NewLootChestWidget);
+}
+
+void ATfsPlayerController::ChangeSelectedInventoryItem(float ChangeDirection)
+{
+	GameplayWidget->ChangeSelectedInventoryItem(ChangeDirection);
 }
 
 void ATfsPlayerController::SpawnGameplayWidget()

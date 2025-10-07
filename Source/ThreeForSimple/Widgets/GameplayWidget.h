@@ -26,9 +26,17 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UCrosshairWidget* CrosshairWidget;
 
+	//Inventory
+public:
+	void ChangeSelectedInventoryItem(float ChangeDirection);
+	//DebugGodModeWidget
+public:
+	void ToggleDebugGodModeWidget(const struct FGameplayEventData* EventData);
+
 	//Loot Chest
 public:
 	void ToggleLootChest(const struct FGameplayEventData* EventData);
+	void SetLootChest(class UInventoryWidget* NewLootChestWidget);
 private:
 	void PlayLootChestPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
@@ -37,8 +45,14 @@ private:
 	void SetFocusToGameOnly();
 	
 	UPROPERTY(meta = (BindWidget))
-	class ULootChestWidget* LootChestWidget;
+	class UInventoryWidget* LootChestWidget;
+
+	UPROPERTY(meta = (BindWidget))
+	class ULootChestWidget* DebugGodModeWidget;
 
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* LootChestPopupAnimation;
+
+	UPROPERTY(meta = (BindWidget))
+	class UInventoryWidget* InventoryWidget;
 };

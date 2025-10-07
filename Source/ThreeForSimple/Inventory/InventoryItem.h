@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "InventoryItem.generated.h"
 
 //Use hashes to resolve not having to communicate an entire inventory item over the network but only a uint32
@@ -40,10 +39,24 @@ class THREEFORSIMPLE_API UInventoryItem : public UObject
 public:
 	void InitItem(const FInventoryItemHandle& NewHandle, const class UPA_LootChestItem* NewLootChestItem);
 	const class UPA_LootChestItem* GetLootChestItem() const { return LootChestItem; }
+
+	void SetSlotNumber(int NewSlotNumber);
+	FORCEINLINE int GetSlotNumber() const {return SlotNumber; }
+	
 	//Can be a copy because the size of FInventoryItemHandle is almost the same as a pointer
 	FInventoryItemHandle GetHandle() const { return Handle; };
+
+	bool IsValid() const;
+
+	FORCEINLINE void SetSelected(bool bSelectItem = true) {bSelected = bSelectItem; }
+
+	FORCEINLINE bool IsItemSelected() const { return bSelected; }
 private:
 	UPROPERTY()
 	const class UPA_LootChestItem* LootChestItem;
 	FInventoryItemHandle Handle;
+
+	int SlotNumber;
+	
+	bool bSelected;
 };
