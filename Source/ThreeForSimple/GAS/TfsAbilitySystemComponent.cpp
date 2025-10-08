@@ -70,20 +70,22 @@ void UTfsAbilitySystemComponent::ApplyFullStatEffect()
 
 void UTfsAbilitySystemComponent::AddInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility)
 {
-	RemoveInputAbility(InputID, GameplayAbility);
+	RemoveInputAbility(InputID);
 	GiveAbility(FGameplayAbilitySpec(GameplayAbility, 0, static_cast<int32>(InputID), nullptr));
 	InputBasicAbilities.Add(InputID, GameplayAbility);
 }
 
-void UTfsAbilitySystemComponent::RemoveInputAbility(ECAbilityInputID InputID, const TSubclassOf<UGameplayAbility>& GameplayAbility)
+void UTfsAbilitySystemComponent::RemoveInputAbility(ECAbilityInputID InputID)
 {
 	if (InputBasicAbilities.Find(InputID))
 		InputBasicAbilities.Remove(InputID);
+
 	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{
 		if (Spec.InputID == static_cast<int32>(InputID))
 		{
 			ClearAbility(Spec.Handle);
+			return;
 		}
 	}
 }

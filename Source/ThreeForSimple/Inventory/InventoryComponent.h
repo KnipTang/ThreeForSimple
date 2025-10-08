@@ -24,10 +24,11 @@ public:
 	UInventoryItem* GetInventoryItemByHandle(const FInventoryItemHandle& Handle) const;
 
 	void TryAddToInventory(const class UPA_LootChestItem* ItemToAdd);
+	void TryAddCurrentAbilityOnSelectedItem(const FInventoryItemHandle& NewItemHandle, const FInventoryItemHandle& OldItemHandle);
 
 	FORCEINLINE int GetInventoryCapacity() const { return InventoryCapacity; }
 
-	FORCEINLINE class UAbilitySystemComponent* GetOwnerAbilitySystemComponent() const { return OwnerAbilitySystemComponent; }
+	FORCEINLINE class UTfsAbilitySystemComponent* GetOwnerAbilitySystemComponent() const { return OwnerTfsAbilitySystemComponent; }
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -37,7 +38,7 @@ private:
 	int InventoryCapacity = 6;
 
 	UPROPERTY()
-	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
+	class UTfsAbilitySystemComponent* OwnerTfsAbilitySystemComponent;
 	
 	UPROPERTY()
 	TMap<struct FInventoryItemHandle, class UInventoryItem*> InventoryMap;
@@ -48,6 +49,8 @@ private:
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ItemAdded(const class UPA_LootChestItem* ItemToAdd);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_AddCurrentAbilityOnSelectedItem(const FInventoryItemHandle& NewItemHandle, const FInventoryItemHandle& OldItemHandle);
 
 	/***************************************************/
 	/*						Client						/

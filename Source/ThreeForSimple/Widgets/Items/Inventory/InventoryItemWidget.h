@@ -6,6 +6,8 @@
 #include "ThreeForSimple/Widgets/Items/ItemWidget.h"
 #include "InventoryItemWidget.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemSelectedDelegate, const struct FInventoryItemHandle& /*NewItemHande*/, const struct FInventoryItemHandle& /*OldItemHande*/)
+
 /**
  * 
  */
@@ -16,15 +18,18 @@ class THREEFORSIMPLE_API UInventoryItemWidget : public UItemWidget
 public:
 	virtual void NativeConstruct() override;
 
+	FOnItemSelectedDelegate OnItemSelectedDelegate;
+	
 	void UpdateInventoryItem(const class UInventoryItem* Item);
-	bool IsEmpty();
+	bool IsEmpty() const;
 	void EmptySlot();
 	void SetSlotNumber(int NewSlotNumber);
 	FORCEINLINE int GetSlotNumber() const { return SlotNumber; }
 
 	FORCEINLINE const UInventoryItem* GetInventoryItem() const {return InventoryItem;}
+	FInventoryItemHandle GetItemHandle() const;
 	
-	void SetSelected(bool bSelectItem = true);
+	void SetSelected(const FInventoryItemHandle& OldItemHandle, bool bSelectItem = true);
 	FORCEINLINE bool IsItemSelected() const { return bSelected; }
 private:
 	UPROPERTY(meta = (BindWidget))

@@ -3,9 +3,6 @@
 
 #include "InventoryWidget.h"
 #include "InventoryItemWidget.h"
-#include "Components/HorizontalBox.h"
-#include "Components/HorizontalBoxSlot.h"
-#include "Components/HorizontalBoxSlot.h"
 #include "Components/WrapBox.h"
 #include "Components/WrapBoxSlot.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemComponent.h"
@@ -23,8 +20,6 @@ void UInventoryWidget::NativeConstruct()
 		{
 			InventoryComponent->OnItemAdded.AddUObject(this, &UInventoryWidget::ItemAdded);
 			const int Capacity = InventoryComponent->GetInventoryCapacity();
-
-			OwnerAbilitySystemComponent = Cast<UTfsAbilitySystemComponent>(InventoryComponent->GetOwnerAbilitySystemComponent());
 			
 			ItemsContainer->ClearChildren();
 				
@@ -36,6 +31,8 @@ void UInventoryWidget::NativeConstruct()
 					UWrapBoxSlot* NewItemSlot = ItemsContainer->AddChildToWrapBox(NewEmptyWidget);
 					NewItemSlot->SetPadding(FMargin(2.f));
 					ItemWidgets.Add(NewEmptyWidget);
+
+					NewEmptyWidget->OnItemSelectedDelegate.AddUObject(InventoryComponent, &UInventoryComponent::TryAddCurrentAbilityOnSelectedItem);
 				}
 			}
 		}
@@ -58,7 +55,7 @@ void UInventoryWidget::ItemAdded(const UInventoryItem* InventoryItem)
 		if (!SelectedItemWidgets)
 		{
 			SelectedItemWidgets = NextAvailableSlot;
-			SelectedItemWidgets->SetSelected(true);
+			SelectedItemWidgets->SetSelected(FInventoryItemHandle::InvalidHandle(),true);
 		}
 	}
 }
@@ -81,62 +78,9 @@ void UInventoryWidget::ChangeSelectedItem(float ChangeDirection)
 	int NewSelectedSlotNumber = SelectedItemWidgets->GetSlotNumber() + ChangeDirection;
 	if (NewSelectedSlotNumber > PopulatedItemEntryWidgets.Num() - 1 || NewSelectedSlotNumber < 0)
 		return;
-
-	SelectedItemWidgets->SetSelected(false);
-	RemoveCurrentAbilityOnSelectedItem();
 	
+	SelectedItemWidgets->SetSelected(FInventoryItemHandle::InvalidHandle(), false);
+	const FInventoryItemHandle OldHandle = SelectedItemWidgets->GetItemHandle();
 	SelectedItemWidgets = ItemWidgets[NewSelectedSlotNumber];
-	SelectedItemWidgets->SetSelected(true);
-	AddCurrentAbilityOnSelectedItem();
-}
-
-void UInventoryWidget::RemoveCurrentAbilityOnSelectedItem()
-{
-	const UPA_LootChestItem* PA_Item = SelectedItemWidgets->GetInventoryItem()->GetLootChestItem();
-	if (!PA_Item)
-		return;
-
-	OwnerAbilitySystemComponent = Cast<UTfsAbilitySystemComponent>(InventoryComponent->GetOwnerAbilitySystemComponent());
-	
-	switch (PA_Item->GetItemType())
-	{
-	case EItemType::Melee:
-		if (!OwnerAbilitySystemComponent)
-			break;
-		if (const TSubclassOf<UGameplayAbility> NewAbility = PA_Item->GetGrantedInputAbility(ECAbilityInputID::BasicAttack))
-			OwnerAbilitySystemComponent->RemoveInputAbility(ECAbilityInputID::BasicAttack, NewAbility);
-		break;
-	case EItemType::Weapon:
-		if (!OwnerAbilitySystemComponent)
-			break;
-		if (const TSubclassOf<UGameplayAbility> NewAbility = PA_Item->GetGrantedInputAbility(ECAbilityInputID::Aim))
-			OwnerAbilitySystemComponent->RemoveInputAbility(ECAbilityInputID::Aim, NewAbility);
-		break;
-	}
-}
-
-void UInventoryWidget::AddCurrentAbilityOnSelectedItem()
-{
-	const UPA_LootChestItem* PA_Item = SelectedItemWidgets->GetInventoryItem()->GetLootChestItem();
-	if (!PA_Item)
-		return;
-
-	OwnerAbilitySystemComponent = Cast<UTfsAbilitySystemComponent>(InventoryComponent->GetOwnerAbilitySystemComponent());
-	
-	switch (PA_Item->GetItemType())
-	{
-	case EItemType::Melee:
-		if (!OwnerAbilitySystemComponent)
-			break;
-		if (const TSubclassOf<UGameplayAbility> NewAbility = PA_Item->GetGrantedInputAbility(ECAbilityInputID::BasicAttack))
-			OwnerAbilitySystemComponent->AddInputAbility(ECAbilityInputID::BasicAttack, NewAbility);
-		break;
-	case EItemType::Weapon:
-		if (!OwnerAbilitySystemComponent)
-			break;
-		if (const TSubclassOf<UGameplayAbility> NewAbility = PA_Item->GetGrantedInputAbility(ECAbilityInputID::Aim))
-			OwnerAbilitySystemComponent->AddInputAbility(ECAbilityInputID::Aim, NewAbility);
-		break;
-	}
-	
+	SelectedItemWidgets->SetSelected(OldHandle, true);
 }

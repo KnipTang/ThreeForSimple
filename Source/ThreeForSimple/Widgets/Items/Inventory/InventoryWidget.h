@@ -40,12 +40,7 @@ private:
 public:
 	void ChangeSelectedItem(float ChangeDirection);
 private:
-	void RemoveCurrentAbilityOnSelectedItem();
-	void AddCurrentAbilityOnSelectedItem();
 	
 	UPROPERTY()
 	UInventoryItemWidget* SelectedItemWidgets;
-
-	UPROPERTY()
-	class UTfsAbilitySystemComponent* OwnerAbilitySystemComponent;
 };

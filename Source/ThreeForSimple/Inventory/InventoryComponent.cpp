@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "PA_LootChestItem.h"
+#include "ThreeForSimple/GAS/TfsAbilitySystemComponent.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -42,13 +43,41 @@ void UInventoryComponent::TryAddToInventory(const UPA_LootChestItem* ItemToAdd)
 	Server_ItemAdded(ItemToAdd);
 }
 
+void UInventoryComponent::TryAddCurrentAbilityOnSelectedItem(const FInventoryItemHandle& NewItemHandle, const FInventoryItemHandle& OldItemHandle)
+{
+	if (!GetInventoryItemByHandle(NewItemHandle))
+		return;
+	
+	Server_AddCurrentAbilityOnSelectedItem(NewItemHandle, OldItemHandle);
+}
+
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
+	OwnerTfsAbilitySystemComponent = Cast<UTfsAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner()));
 	
+}
+
+void UInventoryComponent::Server_AddCurrentAbilityOnSelectedItem_Implementation(const FInventoryItemHandle& NewItemHandle, const FInventoryItemHandle& OldItemHandle)
+{
+	UInventoryItem* CurrentItem = GetInventoryItemByHandle(NewItemHandle);
+	UInventoryItem* OldItem = GetInventoryItemByHandle(OldItemHandle);
+	if (!CurrentItem)
+		return;
+
+	if (!GetOwner()->HasAuthority())
+		return;
+
+	if (OldItem)
+		OldItem->RemoveCurrentAbilityOnSelectedItem(OwnerTfsAbilitySystemComponent);
+	CurrentItem->AddCurrentAbilityOnSelectedItem(OwnerTfsAbilitySystemComponent);
+}
+
+bool UInventoryComponent::Server_AddCurrentAbilityOnSelectedItem_Validate(const FInventoryItemHandle& NewItemHandle, const FInventoryItemHandle& OldItemHandle)
+{
+	return true;
 }
 
 void UInventoryComponent::Server_ItemAdded_Implementation(const UPA_LootChestItem* ItemToAdd)
@@ -63,11 +92,11 @@ void UInventoryComponent::Server_ItemAdded_Implementation(const UPA_LootChestIte
 	FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
 	InventoryItem->InitItem(NewHandle, ItemToAdd);
 	InventoryMap.Add(NewHandle, InventoryItem);
-
-	OnItemAdded.Broadcast(InventoryItem);
-
+	
 	UE_LOG(LogTemp, Warning, TEXT("Server Adding Shop Item: %s, with Id: %d"), *(InventoryItem->GetLootChestItem()->GetItemName().ToString()), NewHandle.GetHandleID());
 
+	OnItemAdded.Broadcast(InventoryItem);
+	
 	Client_ItemAdded(NewHandle, ItemToAdd);
 }
 

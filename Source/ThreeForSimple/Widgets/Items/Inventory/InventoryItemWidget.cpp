@@ -28,7 +28,7 @@ void UInventoryItemWidget::UpdateInventoryItem(const class UInventoryItem* Item)
 
 }
 
-bool UInventoryItemWidget::IsEmpty()
+bool UInventoryItemWidget::IsEmpty() const
 {
 	return !InventoryItem || !InventoryItem->IsValid();
 }
@@ -45,9 +45,22 @@ void UInventoryItemWidget::SetSlotNumber(int NewSlotNumber)
 	SlotNumber = NewSlotNumber;
 }
 
-void UInventoryItemWidget::SetSelected(bool bSelectItem)
+FInventoryItemHandle UInventoryItemWidget::GetItemHandle() const
+{
+	if (!IsEmpty())
+	{
+		return InventoryItem->GetHandle();
+	}
+
+	return FInventoryItemHandle::InvalidHandle();
+}
+
+void UInventoryItemWidget::SetSelected(const FInventoryItemHandle& OldItemHandle, bool bSelectItem)
 {
 	bSelected = bSelectItem;
 	
 	bSelected ? Background->SetBrushColor(ColorBackgroundSelected) : Background->SetBrushColor(ColorBackgroundUnselected);
+
+	if (bSelectItem)
+		OnItemSelectedDelegate.Broadcast(GetItemHandle(), OldItemHandle);
 }

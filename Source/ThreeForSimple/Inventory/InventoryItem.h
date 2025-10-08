@@ -38,7 +38,7 @@ class THREEFORSIMPLE_API UInventoryItem : public UObject
 	GENERATED_BODY()
 public:
 	void InitItem(const FInventoryItemHandle& NewHandle, const class UPA_LootChestItem* NewLootChestItem);
-	const class UPA_LootChestItem* GetLootChestItem() const { return LootChestItem; }
+	const class UPA_LootChestItem* GetLootChestItem() const { return PA_LootChestItem; }
 
 	void SetSlotNumber(int NewSlotNumber);
 	FORCEINLINE int GetSlotNumber() const {return SlotNumber; }
@@ -47,9 +47,13 @@ public:
 	FInventoryItemHandle GetHandle() const { return Handle; };
 
 	bool IsValid() const;
+	
+	void RemoveCurrentAbilityOnSelectedItem(class UTfsAbilitySystemComponent* TfsAbilitySystemComponent) const;
+	void AddCurrentAbilityOnSelectedItem(class UTfsAbilitySystemComponent* TfsAbilitySystemComponent) const;
+private:
 private:
 	UPROPERTY()
-	const class UPA_LootChestItem* LootChestItem;
+	const class UPA_LootChestItem* PA_LootChestItem;
 	FInventoryItemHandle Handle;
 
 	int SlotNumber;

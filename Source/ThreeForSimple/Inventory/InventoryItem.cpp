@@ -4,6 +4,7 @@
 #include "InventoryItem.h"
 
 #include "PA_LootChestItem.h"
+#include "ThreeForSimple/GAS/TfsAbilitySystemComponent.h"
 
 FInventoryItemHandle::FInventoryItemHandle() :
 	HandleID{GetInvalidID()}
@@ -56,7 +57,7 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key)
 void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_LootChestItem* NewLootChestItem)
 {
 	Handle = NewHandle;
-	LootChestItem = NewLootChestItem;
+	PA_LootChestItem = NewLootChestItem;
 }
 
 void UInventoryItem::SetSlotNumber(int NewSlotNumber)
@@ -66,5 +67,48 @@ void UInventoryItem::SetSlotNumber(int NewSlotNumber)
 
 bool UInventoryItem::IsValid() const
 {
-	return LootChestItem != nullptr;
+	return PA_LootChestItem != nullptr;
+}
+
+void UInventoryItem::RemoveCurrentAbilityOnSelectedItem(UTfsAbilitySystemComponent* TfsAbilitySystemComponent) const
+{
+	if (!PA_LootChestItem)
+		return;
+	if (!TfsAbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoASC"));
+		return;
+	}
+	
+	switch (PA_LootChestItem->GetItemType())
+	{
+	case EItemType::Melee:
+		break;
+	case EItemType::Weapon:
+		if (const TSubclassOf<UGameplayAbility> ToRemoveAbility = PA_LootChestItem->GetGrantedInputAbility(ECAbilityInputID::Aim))
+			TfsAbilitySystemComponent->RemoveInputAbility(ECAbilityInputID::Aim);
+		break;
+	}
+}
+
+void UInventoryItem::AddCurrentAbilityOnSelectedItem(UTfsAbilitySystemComponent* TfsAbilitySystemComponent) const
+{
+	if (!PA_LootChestItem)
+		return;
+	if (!TfsAbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoASC"));
+		return;
+	}
+
+	switch (PA_LootChestItem->GetItemType())
+	{
+	case EItemType::Melee:
+		break;
+	case EItemType::Weapon:
+		if (const TSubclassOf<UGameplayAbility> NewAbility = PA_LootChestItem->GetGrantedInputAbility(ECAbilityInputID::Aim))
+			TfsAbilitySystemComponent->AddInputAbility(ECAbilityInputID::Aim, NewAbility);
+		break;
+	}
+	
 }
