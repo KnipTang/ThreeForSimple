@@ -5,6 +5,11 @@
 #include "EngineUtils.h"
 #include "GameFramework/PlayerStart.h"
 
+ATfsGameModeBase::ATfsGameModeBase()
+{
+	bUseSeamlessTravel = true;
+}
+
 APlayerController* ATfsGameModeBase::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
 	APlayerController* NewPlayerController = Super::SpawnPlayerController(InRemoteRole, Options);

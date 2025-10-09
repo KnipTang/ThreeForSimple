@@ -9,10 +9,18 @@
 #include "Net/UnrealNetwork.h"
 #include "ThreeForSimple/Widgets/GameplayWidget.h"
 
+void ATfsPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	SetInputMode(FInputModeGameOnly());
+	SetShowMouseCursor(false);
+}
+
 void ATfsPlayerController::OnPossess(APawn* NewPawn)
 {
 	Super::OnPossess(NewPawn);
-
+	
 	TfsPlayerCharacter = Cast<ATfsPlayerCharacter>(NewPawn);
 	if (TfsPlayerCharacter)
 	{

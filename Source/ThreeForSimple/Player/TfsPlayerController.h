@@ -16,6 +16,7 @@ class THREEFORSIMPLE_API ATfsPlayerController : public APlayerController, public
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
 	// only called on the SERVER (Design of unreal)
 	virtual void OnPossess(APawn* NewPawn) override;
 	// only called on the CLIENT (Design of unreal), also on the listening server (P2P server setup)

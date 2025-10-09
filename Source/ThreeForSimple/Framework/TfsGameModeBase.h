@@ -16,6 +16,7 @@ class THREEFORSIMPLE_API ATfsGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	ATfsGameModeBase();
 	virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
 
 private:
