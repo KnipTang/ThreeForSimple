@@ -20,6 +20,7 @@ public:
 	static FGameplayTag GetMeleeAttackAbilityTag();
 	static FGameplayTag GetBasicAttackInputPressedTag();
 	static FGameplayTag GetBasicAttackInputReleasedTag();
+	static FGameplayTag GetWeaponEndAbilityTag();
 	static FGameplayTag GetDeadStatTag();
 	static FGameplayTag GetAimStatTag();
 	static FGameplayTag GetCrosshairStatTag();

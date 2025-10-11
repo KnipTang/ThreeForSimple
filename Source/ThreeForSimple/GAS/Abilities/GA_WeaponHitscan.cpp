@@ -10,12 +10,7 @@
 
 void UGA_WeaponHitscan::Shoot(FGameplayEventData PayLoad)
 {
-	if (!bCanShoot)
-		return;
-	
 	Super::Shoot(PayLoad);
-
-	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
 	
 	AActor* OwningActor = GetAvatarActorFromActorInfo();
 
@@ -23,11 +18,7 @@ void UGA_WeaponHitscan::Shoot(FGameplayEventData PayLoad)
 		return;
 
 	if (!IsActorTeamAttitudeIs(CurrentAimTarget, ETeamAttitude::Hostile))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TeamNotHostile"));
 		return;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("TeamHostile"));
 	
 	UTfsAbilitySystemStatics::ApplyEffect(OwningActor, CurrentAimTarget, MakeOutgoingGameplayEffectSpec(HitscanHitEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo)));
 	

@@ -51,6 +51,11 @@ void UGA_Weapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 		UAbilityTask_WaitGameplayEvent* WaitShootProjectileEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,  GetWeaponTag(), nullptr, false, false);
 		WaitShootProjectileEvent->EventReceived.AddDynamic(this, &UGA_Weapon::Shoot);
 		WaitShootProjectileEvent->ReadyForActivation();
+
+		//Shoot animation end 
+		UAbilityTask_WaitGameplayEvent* WaitShootAnimEndEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,  UTfsAbilitySystemStatics::GetWeaponEndAbilityTag());
+		WaitShootAnimEndEvent->EventReceived.AddDynamic(this, &UGA_Weapon::ShootAnimEnd);
+		WaitShootAnimEndEvent->ReadyForActivation();
 	}
 
 	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
@@ -89,9 +94,18 @@ void UGA_Weapon::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 {
-	if (!bCanShoot && DelayBetweenShotsSeconds != 0)
-		return;
+	bBasicAttackPressed = true;
 
+	if (!bCanShoot)
+	{
+		StartResetCanShootTimer();
+		return;
+	}
+	
+	bCanShoot = false;
+
+	StartResetCanShootTimer();
+	
 	//Plays only on the server
 	if (HasAuthority(&CurrentActivationInfo))
 	{
@@ -106,37 +120,58 @@ void UGA_Weapon::StartShooting(FGameplayEventData PayLoad)
 
 void UGA_Weapon::StopShooting(FGameplayEventData PayLoad)
 {
+	bBasicAttackPressed = false;
+	
 	if (UAnimInstance* OwnerAnimInst = GetAnimationInstance())
 	{
 		FName CurrentSectionName = OwnerAnimInst->Montage_GetCurrentSection(ShootMontage);
 		OwnerAnimInst->Montage_SetNextSection(CurrentSectionName, NAME_None, ShootMontage);
 	}
+
+	StartResetCanShootTimer();
 }
 
 void UGA_Weapon::Shoot(FGameplayEventData PayLoad)
-{
-	if (DelayBetweenShotsSeconds == 0)
-		return;
-	
-	if (!bCanShoot)
-		return;
+{	
+}
 
-	bCanShoot = false;
-	StopShooting(FGameplayEventData());
-	
+void UGA_Weapon::ShootAnimEnd(FGameplayEventData PayLoad)
+{
 	if (UWorld* World = GetWorld())
 		World->GetTimerManager().SetTimer(
-		DelayBetweenShotsTimerHandle,
+		CheckIfCanShootTimerHandle,
 		this,
-		&UGA_Weapon::ResetCanShoot,
-		DelayBetweenShotsSeconds,
-		false
+		&UGA_Weapon::TryShootAgain,
+		CheckIfCanShootSeconds,
+		true
 	);
 }
 
 FGameplayTag UGA_Weapon::GetWeaponTag()
 {
-	return FGameplayTag::RequestGameplayTag("Ability.Weapon");
+	return FGameplayTag::RequestGameplayTag("Ability.Weapon.Type");
+}
+
+void UGA_Weapon::StartResetCanShootTimer()
+{
+	if (DelayBetweenShotsSeconds == 0)
+		ResetCanShoot();
+	
+	const UWorld* World = GetWorld();
+	if (!World)
+		return;
+
+	FTimerManager& WorldTimerManager = World->GetTimerManager();
+	
+	if (WorldTimerManager.IsTimerActive(DelayBetweenShotsTimerHandle))
+		return;
+
+	WorldTimerManager.SetTimer(
+	DelayBetweenShotsTimerHandle,
+	this,
+	&UGA_Weapon::ResetCanShoot,
+	DelayBetweenShotsSeconds,
+	false);
 }
 
 void UGA_Weapon::ResetCanShoot()
@@ -144,7 +179,18 @@ void UGA_Weapon::ResetCanShoot()
 	if (UWorld* World = GetWorld())
 		World->GetTimerManager().ClearTimer(DelayBetweenShotsTimerHandle);
 	bCanShoot = true;
-	StartShooting(FGameplayEventData());
+}
+
+void UGA_Weapon::TryShootAgain()
+{
+	if (!bCanShoot)
+		return;
+	
+	if (UWorld* World = GetWorld())
+		World->GetTimerManager().ClearTimer(CheckIfCanShootTimerHandle);
+
+	if (bBasicAttackPressed == true)
+		StartShooting(FGameplayEventData());
 }
 
 AActor* UGA_Weapon::GetAimTargetIfValid() const

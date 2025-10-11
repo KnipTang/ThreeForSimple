@@ -74,8 +74,7 @@ TArray<FHitResult> UTfsGameplayAbility::GetHitResultFromSweepLocationTargetData(
 
 void UTfsGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)
 {
-	UAnimInstance* OwnerAnimInst = GetAnimationInstance();
-	if (OwnerAnimInst && !OwnerAnimInst->Montage_IsPlaying(MontageToPlay))
+	if (UAnimInstance* OwnerAnimInst = GetAnimationInstance())
 	{
 		OwnerAnimInst->Montage_Play(MontageToPlay);
 	}

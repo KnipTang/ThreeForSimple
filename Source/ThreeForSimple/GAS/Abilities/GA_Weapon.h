@@ -30,18 +30,24 @@ protected:
 	UFUNCTION()
 	virtual void Shoot(FGameplayEventData PayLoad);
 
+	UFUNCTION()
+	virtual void ShootAnimEnd(FGameplayEventData PayLoad);
+
 	static FGameplayTag GetWeaponTag();
 
+	bool bBasicAttackPressed = false;
+	
 	//Config
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	float ShootRange = 3000.f;
-
+	
 	//Animations
 	UPROPERTY(EditDefaultsOnly, Category = "Aim")
 	const TSubclassOf<UAnimInstance> AimAnimInstance;
 	UPROPERTY(EditDefaultsOnly, Category = "Aim")
 	UAnimMontage* ShootMontage;
 
+	void StartResetCanShootTimer();
 	//Delay between shots
 	void ResetCanShoot();
 	
@@ -50,6 +56,12 @@ protected:
 	bool bCanShoot = true;
 	
 	FTimerHandle DelayBetweenShotsTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+	float CheckIfCanShootSeconds = 0.1f;
+	FTimerHandle CheckIfCanShootTimerHandle;
+
+	void TryShootAgain();
 	/***************************************************/
 	/*			   Find if aiming at target			    /
 	/***************************************************/

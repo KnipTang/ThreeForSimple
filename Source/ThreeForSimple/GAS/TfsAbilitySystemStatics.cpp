@@ -23,6 +23,11 @@ FGameplayTag UTfsAbilitySystemStatics::GetBasicAttackInputReleasedTag()
 	return FGameplayTag::RequestGameplayTag("Ability.MeleeAttack.Released");
 }
 
+FGameplayTag UTfsAbilitySystemStatics::GetWeaponEndAbilityTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.Weapon.End");
+}
+
 FGameplayTag UTfsAbilitySystemStatics::GetDeadStatTag()
 {
 	return FGameplayTag::RequestGameplayTag("Stats.Dead");
