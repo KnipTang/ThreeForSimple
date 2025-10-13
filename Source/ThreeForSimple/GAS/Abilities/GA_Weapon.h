@@ -47,9 +47,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Aim")
 	UAnimMontage* ShootMontage;
 
-	void StartResetCanShootTimer();
+	void StartResetCanShootTimer(const bool bIsStopShooting = false);
 	//Delay between shots
 	void ResetCanShoot();
+
+	bool bIsCircleLoadSuccessful;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	float DelayBetweenShotsSeconds = 0.f;
@@ -62,6 +64,9 @@ protected:
 	FTimerHandle CheckIfCanShootTimerHandle;
 
 	void TryShootAgain();
+
+	UPROPERTY()
+	class ATfsPlayerController* OwningTfsPlayerController;
 	/***************************************************/
 	/*			   Find if aiming at target			    /
 	/***************************************************/

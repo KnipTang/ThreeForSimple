@@ -43,6 +43,11 @@ FGameplayTag UTfsAbilitySystemStatics::GetCrosshairStatTag()
 	return FGameplayTag::RequestGameplayTag("Stats.Crosshair");
 }
 
+FGameplayTag UTfsAbilitySystemStatics::GetCircleLoadStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.CircleLoad");
+}
+
 FGameplayTag UTfsAbilitySystemStatics::GetTargetUpdatedTag()
 {
 	return FGameplayTag::RequestGameplayTag("Target.Updated");

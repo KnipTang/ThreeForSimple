@@ -26,6 +26,12 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UCrosshairWidget* CrosshairWidget;
 
+	UPROPERTY(meta = (BindWidget))
+	class UCircleLoadWidget* CircleLoadWidget;
+
+	//CircleLoadWidget
+public:
+	void ActivateCircleLoadWidget(const bool bIsActivate, const float TotalCircleLoadTime = 0);
 	//Inventory
 public:
 	void ChangeSelectedInventoryItem(float ChangeDirection);

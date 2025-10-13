@@ -24,6 +24,7 @@ public:
 	static FGameplayTag GetDeadStatTag();
 	static FGameplayTag GetAimStatTag();
 	static FGameplayTag GetCrosshairStatTag();
+	static FGameplayTag GetCircleLoadStatTag();
 	static FGameplayTag GetTargetUpdatedTag();
 	static FGameplayTag GetInteractActivateTag();
 

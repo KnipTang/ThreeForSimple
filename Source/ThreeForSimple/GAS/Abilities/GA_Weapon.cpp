@@ -9,6 +9,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "ThreeForSimple/Character/TfsCharacter.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
+#include "ThreeForSimple/Player/TfsPlayerController.h"
 
 UGA_Weapon::UGA_Weapon()
 {
@@ -16,6 +17,7 @@ UGA_Weapon::UGA_Weapon()
 	
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
 	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
+	ActivationOwnedTags.AddTag(UTfsAbilitySystemStatics::GetCircleLoadStatTag());
 	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetAimStatTag());
 	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetMeleeAttackAbilityTag());
 	BlockAbilitiesWithTag.AddTag(UTfsAbilitySystemStatics::GetCrosshairStatTag());
@@ -60,6 +62,11 @@ void UGA_Weapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 
 	if (ATfsCharacter* OwningCharacter = Cast<ATfsCharacter>(GetOwningCharacter()))
 		OwningCharacter->SetAnimInstance(AimAnimInstance);
+
+	OwningTfsPlayerController = Cast<ATfsPlayerController>(ActorInfo->PlayerController.Get());
+
+	bCanShoot = false;
+	StartResetCanShootTimer();
 }
 
 void UGA_Weapon::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -127,8 +134,6 @@ void UGA_Weapon::StopShooting(FGameplayEventData PayLoad)
 		FName CurrentSectionName = OwnerAnimInst->Montage_GetCurrentSection(ShootMontage);
 		OwnerAnimInst->Montage_SetNextSection(CurrentSectionName, NAME_None, ShootMontage);
 	}
-
-	StartResetCanShootTimer();
 }
 
 void UGA_Weapon::Shoot(FGameplayEventData PayLoad)
@@ -152,8 +157,11 @@ FGameplayTag UGA_Weapon::GetWeaponTag()
 	return FGameplayTag::RequestGameplayTag("Ability.Weapon.Type");
 }
 
-void UGA_Weapon::StartResetCanShootTimer()
+void UGA_Weapon::StartResetCanShootTimer(const bool bIsStopShooting)
 {
+	UE_LOG(LogTemp, Display, TEXT("ActivationMode: %s"), 
+		*UEnum::GetValueAsString(CurrentActivationInfo.ActivationMode));
+	
 	if (DelayBetweenShotsSeconds == 0)
 		ResetCanShoot();
 	
@@ -163,8 +171,11 @@ void UGA_Weapon::StartResetCanShootTimer()
 
 	FTimerManager& WorldTimerManager = World->GetTimerManager();
 	
-	if (WorldTimerManager.IsTimerActive(DelayBetweenShotsTimerHandle))
+	if (DelayBetweenShotsTimerHandle.IsValid())
 		return;
+	
+	if (OwningTfsPlayerController && !bIsCircleLoadSuccessful && !bIsStopShooting)
+		bIsCircleLoadSuccessful = OwningTfsPlayerController->ActivateCircleLoadWidget(!bIsStopShooting, DelayBetweenShotsSeconds);
 
 	WorldTimerManager.SetTimer(
 	DelayBetweenShotsTimerHandle,
@@ -179,6 +190,10 @@ void UGA_Weapon::ResetCanShoot()
 	if (UWorld* World = GetWorld())
 		World->GetTimerManager().ClearTimer(DelayBetweenShotsTimerHandle);
 	bCanShoot = true;
+	bIsCircleLoadSuccessful = false;
+
+	if (OwningTfsPlayerController)
+		OwningTfsPlayerController->ActivateCircleLoadWidget(false);
 }
 
 void UGA_Weapon::TryShootAgain()

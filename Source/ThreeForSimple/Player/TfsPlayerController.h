@@ -27,6 +27,10 @@ public:
 	void ToggleLootChestWidget();
 	void SetLootChestWidget(class UInventoryWidget* NewLootChestWidget);
 
+	//CircleLoadWidget
+	bool ActivateCircleLoadWidget(const bool bIsActivate, const float TotalCircleLoadTime = 0);
+
+	//Inventory
 	void ChangeSelectedInventoryItem(float ChangeDirection);
 private:
 	void SpawnGameplayWidget();

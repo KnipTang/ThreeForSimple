@@ -4,6 +4,7 @@
 #include "GameplayWidget.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "CircleLoadWidget.h"
 #include "ValueGauge.h"
 #include "Items/Inventory/InventoryWidget.h"
 #include "Items/LootChest/LootChestWidget.h"
@@ -25,6 +26,11 @@ void UGameplayWidget::ConfigureWithASC(class UAbilitySystemComponent* ASC)
 	HealthBar->SetAndBoundToGameplayAttribute(ASC, UTfsAttributeSet::GetHealthAttribute(), UTfsAttributeSet::GetMaxHealthAttribute());
 	ASC->GenericGameplayEventCallbacks.Add(UTfsAbilitySystemStatics::GetInteractActivateTag()).AddUObject(this, &UGameplayWidget::ToggleLootChest);
 
+}
+
+void UGameplayWidget::ActivateCircleLoadWidget(const bool bIsActivate, const float TotalCircleLoadTime)
+{
+	CircleLoadWidget->OnActivation.Broadcast(bIsActivate, TotalCircleLoadTime);
 }
 
 void UGameplayWidget::ChangeSelectedInventoryItem(float ChangeDirection)

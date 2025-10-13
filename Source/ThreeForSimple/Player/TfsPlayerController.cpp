@@ -64,6 +64,16 @@ void ATfsPlayerController::SetLootChestWidget(class UInventoryWidget* NewLootChe
 	GameplayWidget->SetLootChest(NewLootChestWidget);
 }
 
+bool ATfsPlayerController::ActivateCircleLoadWidget(const bool bIsActivate, const float TotalCircleLoadTime)
+{
+	if (GameplayWidget)
+	{
+		GameplayWidget->ActivateCircleLoadWidget(bIsActivate, TotalCircleLoadTime);
+		return true;
+	}
+	return false;
+}
+
 void ATfsPlayerController::ChangeSelectedInventoryItem(float ChangeDirection)
 {
 	GameplayWidget->ChangeSelectedInventoryItem(ChangeDirection);
