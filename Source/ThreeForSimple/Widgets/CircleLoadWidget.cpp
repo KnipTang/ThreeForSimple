@@ -10,8 +10,6 @@
 #include "Components/Image.h"
 #include "ThreeForSimple/GAS/TfsAbilitySystemStatics.h"
 
-#pragma optimize("", off)
-
 void UCircleLoadWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
