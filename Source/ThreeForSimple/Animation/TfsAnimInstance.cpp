@@ -21,6 +21,7 @@ void UTfsAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
+	
 	if (OwnerCharacter)
 	{
 		Speed = OwnerCharacter->GetVelocity().Length();

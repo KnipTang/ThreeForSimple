@@ -57,7 +57,7 @@ protected:
 	float DelayBetweenShotsSeconds = 0.f;
 	bool bCanShoot = true;
 	
-	FTimerHandle DelayBetweenShotsTimerHandle;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	float CheckIfCanShootSeconds = 0.1f;
